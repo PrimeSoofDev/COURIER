@@ -1,0 +1,515 @@
+/**
+ * GaaTiTrack - Premium Glassmorphism Hero Design System
+ * Logistics-Tech Visual Identity: Deep Navy, Midnight Blue, Electric Cyan, Authentic Glassmorphism
+ */
+
+:root {
+  /* Premium Dark Logistics Palette */
+  --gt-hero-navy: #071426;
+  --gt-hero-midnight: #0B1F3A;
+  --gt-hero-surface: #0e274a;
+  --gt-hero-blue: #2563EB;
+  --gt-hero-electric: #38BDF8;
+  --gt-hero-cyan: #67E8F9;
+  --gt-hero-white: #FFFFFF;
+  --gt-hero-muted: #94A3B8;
+  --gt-hero-border-glass: rgba(255, 255, 255, 0.16);
+  --gt-hero-border-glow: rgba(56, 189, 248, 0.4);
+  
+  /* Glass Cards */
+  --gt-glass-bg-dark: rgba(11, 31, 58, 0.68);
+  --gt-glass-bg-light: rgba(255, 255, 255, 0.12);
+  --gt-glass-bg-subtle: rgba(255, 255, 255, 0.06);
+  --gt-glass-blur: blur(20px);
+  --gt-glass-shadow: 0 20px 50px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.14) inset;
+  --gt-glass-shadow-lg: 0 25px 60px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.18) inset;
+}
+
+/* ==========================================================================
+   1. Master Hero Section Architecture
+   ========================================================================== */
+.gt-hero-section {
+  position: relative;
+  background-color: var(--gt-hero-navy);
+  background-image: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(37, 99, 235, 0.35), transparent),
+    radial-gradient(circle at 10% 40%, rgba(14, 165, 233, 0.18), transparent 45%),
+    radial-gradient(circle at 90% 70%, rgba(103, 232, 249, 0.12), transparent 40%),
+    linear-gradient(180deg, #071426 0%, #0B1F3A 100%);
+  color: #ffffff;
+  overflow: hidden;
+  padding: 5rem 0 5.5rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Ambient glow lighting orbs */
+.gt-hero-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.7;
+}
+.gt-hero-glow-1 {
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.45) 0%, rgba(37, 99, 235, 0) 70%);
+  top: -120px;
+  right: 5%;
+  animation: gtPulseGlow 9s ease-in-out infinite alternate;
+}
+.gt-hero-glow-2 {
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.3) 0%, rgba(56, 189, 248, 0) 70%);
+  bottom: -80px;
+  left: -40px;
+  animation: gtPulseGlow 12s ease-in-out infinite alternate-reverse;
+}
+
+/* Subtle tech grid background pattern */
+.gt-hero-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 70% 70% at 50% 40%, black 20%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 40%, black 20%, transparent 80%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.gt-hero-container {
+  position: relative;
+  z-index: 2;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ==========================================================================
+   2. Glassmorphism UI Components
+   ========================================================================== */
+.gt-glass-card {
+  background: var(--gt-glass-bg-dark);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--gt-hero-border-glass);
+  border-radius: 20px;
+  box-shadow: var(--gt-glass-shadow);
+  color: #ffffff;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+/* Fallback for browsers lacking backdrop-filter */
+@supports not (backdrop-filter: blur(10px)) {
+  .gt-glass-card {
+    background: rgba(11, 31, 58, 0.94);
+  }
+}
+
+.gt-glass-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--gt-hero-electric);
+  padding: 0.38rem 0.95rem;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+}
+
+.gt-glass-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gt-hero-cyan);
+  box-shadow: 0 0 10px var(--gt-hero-cyan);
+  display: inline-block;
+}
+
+/* Glass Breadcrumb */
+.gt-glass-breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  color: var(--gt-hero-muted);
+  margin-bottom: 1.25rem;
+  backdrop-filter: blur(10px);
+}
+.gt-glass-breadcrumb a {
+  color: #e2e8f0;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.gt-glass-breadcrumb a:hover {
+  color: var(--gt-hero-electric);
+}
+.gt-glass-breadcrumb .sep {
+  opacity: 0.4;
+}
+.gt-glass-breadcrumb .current {
+  color: var(--gt-hero-cyan);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   3. Typography & Actions
+   ========================================================================== */
+.gt-hero-title {
+  font-family: var(--gt-font-display, 'Plus Jakarta Sans', sans-serif);
+  font-size: clamp(2.3rem, 4.5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.14;
+  letter-spacing: -0.025em;
+  color: #ffffff;
+  margin: 0 0 1.25rem 0;
+}
+
+.gt-hero-title .gt-gradient-text {
+  background: linear-gradient(135deg, #ffffff 30%, var(--gt-hero-electric) 75%, var(--gt-hero-cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.gt-hero-desc {
+  font-family: var(--gt-font-body, 'Inter', sans-serif);
+  font-size: clamp(1rem, 1.4vw, 1.15rem);
+  line-height: 1.65;
+  color: #cbd5e1;
+  margin: 0 0 2rem 0;
+  max-width: 580px;
+}
+
+.gt-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.gt-btn-hero-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  padding: 0.85rem 1.75rem;
+  border-radius: 12px;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 24px -6px rgba(37, 99, 235, 0.6), 0 0 0 1px rgba(37, 99, 235, 0.4);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+.gt-btn-hero-primary:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 14px 28px -4px rgba(37, 99, 235, 0.7), 0 0 20px rgba(56, 189, 248, 0.4);
+  color: #ffffff;
+}
+
+.gt-btn-hero-glass {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  padding: 0.85rem 1.6rem;
+  border-radius: 12px;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+.gt-btn-hero-glass:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-2px);
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   4. Hero Photography Frame & Floating Glass Elements
+   ========================================================================== */
+.gt-hero-visual-col {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gt-hero-image-frame {
+  position: relative;
+  width: 100%;
+  max-width: 540px;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.18);
+  background: #0f172a;
+}
+
+.gt-hero-image-frame img {
+  width: 100%;
+  height: 420px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gt-hero-image-frame:hover img {
+  transform: scale(1.03);
+}
+
+/* Gradient overlay on photography to preserve contrast */
+.gt-hero-image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg, 
+    rgba(7, 20, 38, 0.1) 0%, 
+    rgba(7, 20, 38, 0.45) 60%, 
+    rgba(7, 20, 38, 0.85) 100%
+  );
+  pointer-events: none;
+}
+
+/* Floating Glass Status Card (Hero Right Bottom) */
+.gt-float-card-status {
+  position: absolute;
+  bottom: -22px;
+  left: -20px;
+  width: 290px;
+  padding: 1.15rem;
+  background: rgba(11, 31, 58, 0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 18px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(56, 189, 248, 0.2) inset;
+  z-index: 4;
+  animation: gtFloat 6s ease-in-out infinite;
+}
+
+/* Floating Milestone Progress Indicator (Hero Top Right) */
+.gt-float-card-milestone {
+  position: absolute;
+  top: -18px;
+  right: -16px;
+  padding: 0.85rem 1.15rem;
+  background: rgba(11, 31, 58, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.4);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: gtFloatDelayed 7s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   5. Interactive Hero Tracking Widget (Glass Form)
+   ========================================================================== */
+.gt-glass-search-box {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  padding: 0.85rem;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+  margin-top: 1.5rem;
+}
+
+.gt-glass-search-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(7, 20, 38, 0.65);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 4px 6px 4px 14px;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.gt-glass-search-form:focus-within {
+  border-color: var(--gt-hero-electric);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+}
+
+.gt-glass-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-family: inherit;
+  padding: 8px 0;
+}
+.gt-glass-search-input::placeholder {
+  color: #94a3b8;
+}
+
+.gt-glass-search-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+  border: none;
+  font-weight: 700;
+  font-size: 0.875rem;
+  padding: 10px 18px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: transform 0.18s, opacity 0.18s;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+.gt-glass-search-btn:hover {
+  opacity: 0.94;
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   6. Keyframe Animations
+   ========================================================================== */
+@keyframes gtFloat {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes gtFloatDelayed {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(8px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes gtPulseGlow {
+  0% { transform: scale(1) translate(0, 0); opacity: 0.55; }
+  50% { transform: scale(1.1) translate(15px, -10px); opacity: 0.75; }
+  100% { transform: scale(1) translate(0, 0); opacity: 0.55; }
+}
+
+@keyframes gtFadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.gt-anim-fade-up {
+  animation: gtFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.gt-anim-fade-up-d1 {
+  animation: gtFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+  opacity: 0;
+}
+
+.gt-anim-fade-up-d2 {
+  animation: gtFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+  opacity: 0;
+}
+
+/* Reduced Motion Preference */
+@media (prefers-reduced-motion: reduce) {
+  .gt-float-card-status,
+  .gt-float-card-milestone,
+  .gt-hero-glow-1,
+  .gt-hero-glow-2,
+  .gt-anim-fade-up,
+  .gt-anim-fade-up-d1,
+  .gt-anim-fade-up-d2 {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* ==========================================================================
+   7. Responsive Behavior
+   ========================================================================== */
+.gt-hero-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.95fr;
+  gap: 3.5rem;
+  align-items: center;
+}
+
+@media (max-width: 992px) {
+  .gt-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+  .gt-hero-visual-col {
+    margin-top: 1rem;
+  }
+  .gt-hero-image-frame img {
+    height: 340px;
+  }
+  .gt-float-card-status {
+    left: 10px;
+    bottom: -15px;
+    width: calc(100% - 20px);
+    max-width: 290px;
+  }
+  .gt-float-card-milestone {
+    right: 10px;
+    top: -12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .gt-hero-section {
+    padding: 3.5rem 0 4rem 0;
+  }
+  .gt-hero-image-frame img {
+    height: 280px;
+  }
+  .gt-hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .gt-btn-hero-primary,
+  .gt-btn-hero-glass {
+    width: 100%;
+  }
+  .gt-float-card-status {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    margin-top: 1rem;
+    width: 100%;
+    max-width: 100%;
+  }
+  .gt-float-card-milestone {
+    display: none; /* Keep clean on small mobile */
+  }
+}

@@ -1,0 +1,536 @@
+/**
+ * GaaTiTrack Live Shipment Map & Animated Tracking Experience
+ * Premium Logistics Dashboard Stylesheet
+ */
+
+:root {
+  --gt-map-navy: #071426;
+  --gt-map-midnight: #0B1F3A;
+  --gt-map-surface: #0e274a;
+  --gt-map-blue: #0284c7;
+  --gt-map-electric: #38bdf8;
+  --gt-map-cyan: #67e8f9;
+  --gt-map-green: #22c55e;
+  --gt-map-amber: #f59e0b;
+}
+
+/* ==========================================================================
+   1. Live Map Dashboard Container
+   ========================================================================== */
+.gt-live-map-card {
+  position: relative;
+  background: var(--gt-map-navy);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 25px 60px -15px rgba(7, 20, 38, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  margin-bottom: 2.5rem;
+}
+
+.gt-live-map-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.75rem;
+  background: linear-gradient(180deg, rgba(14, 39, 74, 0.85) 0%, rgba(7, 20, 38, 0.95) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.gt-live-map-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.gt-live-beacon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #4ade80;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.gt-live-beacon-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 10px #22c55e;
+  animation: gtBeaconPulse 2s infinite ease-in-out;
+}
+
+@keyframes gtBeaconPulse {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 14px #22c55e; }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+/* Map Canvas Container */
+.gt-map-canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: 520px;
+  background: #0b1f3a;
+}
+
+#gt-shipment-map {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Override Leaflet Dark Tile Styling */
+.leaflet-container {
+  background: #071426 !important;
+  font-family: var(--gt-font-body, 'Inter', sans-serif);
+}
+
+.leaflet-bar {
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 10px !important;
+  overflow: hidden;
+}
+.leaflet-bar a {
+  background-color: rgba(11, 31, 58, 0.88) !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(10px);
+}
+.leaflet-bar a:hover {
+  background-color: #0284c7 !important;
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   2. Floating Glass HUD & Map Controls
+   ========================================================================== */
+.gt-map-hud-panel {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 1000;
+  width: 320px;
+  background: rgba(11, 31, 58, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(56, 189, 248, 0.2) inset;
+  color: #ffffff;
+  pointer-events: auto;
+  transition: all 0.3s ease;
+}
+
+.gt-map-hud-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.gt-map-hud-ref {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
+  font-family: var(--gt-font-display, sans-serif);
+  letter-spacing: 0.02em;
+}
+
+.gt-map-hud-metric {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 0.82rem;
+}
+.gt-map-hud-metric-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+}
+
+/* Map Legend */
+.gt-map-legend-panel {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  z-index: 1000;
+  background: rgba(11, 31, 58, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  padding: 10px 14px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45);
+  color: #cbd5e1;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  pointer-events: auto;
+  flex-wrap: wrap;
+}
+
+.gt-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.gt-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.gt-legend-line-done {
+  width: 18px;
+  height: 3px;
+  background: #38bdf8;
+  border-radius: 2px;
+}
+.gt-legend-line-pending {
+  width: 18px;
+  height: 3px;
+  background: repeating-linear-gradient(90deg, #94a3b8 0px, #94a3b8 4px, transparent 4px, transparent 8px);
+}
+
+/* Map Controls Floating Bar (Top Right) */
+.gt-map-controls-bar {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.gt-map-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(11, 31, 58, 0.88);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+.gt-map-btn:hover {
+  background: #0284c7;
+  border-color: #38bdf8;
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   3. Custom Map Markers & Vehicle Animation
+   ========================================================================== */
+.gt-marker-hub {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border: 2px solid #38bdf8;
+  border-radius: 50%;
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
+  font-size: 16px;
+}
+
+.gt-marker-destination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #065f46, #047857);
+  border: 2px solid #34d399;
+  border-radius: 50%;
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(52, 211, 153, 0.6);
+  font-size: 16px;
+}
+
+.gt-marker-vehicle {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0284c7, #2563eb);
+  border: 2.5px solid #ffffff;
+  border-radius: 50%;
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(2, 132, 199, 0.8), 0 8px 16px rgba(0,0,0,0.4);
+  font-size: 18px;
+  z-index: 10;
+  transition: transform 0.25s linear;
+}
+
+.gt-marker-pulse-ring {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px solid #38bdf8;
+  animation: gtRadarPulse 2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes gtRadarPulse {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* Custom Popup Styling */
+.leaflet-popup-content-wrapper {
+  background: rgba(11, 31, 58, 0.94) !important;
+  backdrop-filter: blur(20px) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5) !important;
+  padding: 6px !important;
+}
+.leaflet-popup-tip {
+  background: #0b1f3a !important;
+}
+.gt-map-popup {
+  padding: 6px 8px;
+}
+.gt-map-popup-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 2px;
+}
+.gt-map-popup-desc {
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+/* ==========================================================================
+   4. Shipment Summary Cards Grid
+   ========================================================================== */
+.gt-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.gt-summary-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 1.5rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.gt-summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+}
+
+.gt-summary-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.gt-summary-val {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  font-family: var(--gt-font-display, sans-serif);
+}
+
+.gt-summary-sub {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+/* ==========================================================================
+   5. Dynamic 7-Stage Milestone Stepper
+   ========================================================================== */
+.gt-milestone-stepper {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 2rem 1.5rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+  margin-bottom: 2rem;
+}
+
+.gt-stepper-track {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  position: relative;
+  padding: 0 1rem;
+}
+
+.gt-stepper-line {
+  position: absolute;
+  top: 20px;
+  left: 3rem;
+  right: 3rem;
+  height: 4px;
+  background: #e2e8f0;
+  z-index: 1;
+  border-radius: 9999px;
+}
+
+.gt-stepper-fill {
+  position: absolute;
+  top: 20px;
+  left: 3rem;
+  height: 4px;
+  background: linear-gradient(90deg, #0284c7, #38bdf8);
+  z-index: 2;
+  border-radius: 9999px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gt-stepper-node {
+  position: relative;
+  z-index: 3;
+  text-align: center;
+  flex: 1;
+}
+
+.gt-stepper-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 8px auto;
+  font-size: 1rem;
+  font-weight: 700;
+  background: #ffffff;
+  border: 3px solid #cbd5e1;
+  color: #64748b;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.gt-stepper-node.completed .gt-stepper-circle {
+  background: #0284c7;
+  border-color: #0284c7;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(2, 132, 199, 0.4);
+}
+
+.gt-stepper-node.active .gt-stepper-circle {
+  background: #ffffff;
+  border-color: #0284c7;
+  color: #0284c7;
+  box-shadow: 0 0 15px rgba(2, 132, 199, 0.5);
+  transform: scale(1.1);
+}
+
+.gt-stepper-node.delivered .gt-stepper-circle {
+  background: #22c55e;
+  border-color: #22c55e;
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.5);
+}
+
+.gt-stepper-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+}
+.gt-stepper-node.active .gt-stepper-label,
+.gt-stepper-node.completed .gt-stepper-label {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   6. Responsive Layout Breakpoints
+   ========================================================================== */
+@media (max-width: 992px) {
+  .gt-map-canvas-wrap {
+    height: 440px;
+  }
+  .gt-map-hud-panel {
+    position: static;
+    width: 100%;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
+  .gt-map-legend-panel {
+    bottom: 10px;
+    right: 10px;
+    font-size: 0.7rem;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .gt-map-canvas-wrap {
+    height: 380px;
+  }
+  .gt-stepper-track {
+    overflow-x: auto;
+    padding-bottom: 10px;
+    justify-content: flex-start;
+    gap: 20px;
+  }
+  .gt-stepper-line, .gt-stepper-fill {
+    display: none; /* Hide connecting horizontal line on small mobile */
+  }
+  .gt-stepper-node {
+    min-width: 80px;
+  }
+  .gt-map-legend-panel {
+    display: none; /* Keep clean on small mobile */
+  }
+}
+
+/* ==========================================================================
+   7. Accessibility: Reduced Motion Support
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .gt-live-beacon-dot,
+  .gt-marker-pulse-ring,
+  .gt-marker-vehicle,
+  .gt-stepper-fill {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+

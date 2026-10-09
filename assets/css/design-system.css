@@ -1,0 +1,871 @@
+/**
+ * GaaTiTrack Unified Design System
+ * Modern, clean, trustworthy visual identity for logistics & courier management.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+/* ==========================================================================
+   1. Design Tokens & CSS Custom Properties
+   ========================================================================== */
+:root {
+  /* Brand Primary - Logistics Blue */
+  --gt-primary: #0284c7;
+  --gt-primary-hover: #0369a1;
+  --gt-primary-active: #075985;
+  --gt-primary-light: #e0f2fe;
+  --gt-primary-subtle: #f0f9ff;
+  --gt-primary-rgb: 2, 132, 199;
+
+  /* Accent - Teal */
+  --gt-accent: #0d9488;
+  --gt-accent-hover: #0f766e;
+  --gt-accent-light: #ccfbf1;
+
+  /* Dark Navy & Slate (Headings, Text, Dark Elements) */
+  --gt-navy-950: #0a0f1d;
+  --gt-navy-900: #0f172a;
+  --gt-navy-800: #1e293b;
+  --gt-navy-700: #334155;
+  --gt-navy-600: #475569;
+  --gt-navy-500: #64748b;
+  --gt-navy-400: #94a3b8;
+
+  /* Surfaces & Backgrounds */
+  --gt-bg-body: #f8fafc;
+  --gt-bg-card: #ffffff;
+  --gt-bg-muted: #f1f5f9;
+  --gt-bg-elevated: #ffffff;
+  
+  /* Borders */
+  --gt-border: #e2e8f0;
+  --gt-border-hover: #cbd5e1;
+  --gt-border-focus: #0284c7;
+
+  /* Status Colors */
+  --gt-status-created-bg: #fef3c7;
+  --gt-status-created-text: #92400e;
+  --gt-status-transit-bg: #e0f2fe;
+  --gt-status-transit-text: #0369a1;
+  --gt-status-delivered-bg: #dcfce7;
+  --gt-status-delivered-text: #166534;
+  --gt-status-failed-bg: #fee2e2;
+  --gt-status-failed-text: #991b1b;
+  --gt-status-neutral-bg: #f1f5f9;
+  --gt-status-neutral-text: #334155;
+
+  /* Typography */
+  --gt-font-display: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --gt-font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  /* Radii */
+  --gt-radius-sm: 6px;
+  --gt-radius-md: 10px;
+  --gt-radius-lg: 16px;
+  --gt-radius-xl: 24px;
+  --gt-radius-full: 9999px;
+
+  /* Shadows */
+  --gt-shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --gt-shadow-sm: 0 2px 4px 0 rgba(15, 23, 42, 0.05), 0 1px 2px 0 rgba(15, 23, 42, 0.03);
+  --gt-shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 4px -1px rgba(15, 23, 42, 0.04);
+  --gt-shadow-lg: 0 12px 24px -4px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.05);
+  --gt-shadow-hover: 0 16px 32px -6px rgba(2, 132, 199, 0.15), 0 4px 12px -2px rgba(15, 23, 42, 0.06);
+
+  /* Transitions */
+  --gt-transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --gt-transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   2. Base & Typography Reset
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--gt-font-body);
+  font-size: 16px;
+  color: var(--gt-navy-800);
+  background-color: var(--gt-bg-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--gt-font-display);
+  color: var(--gt-navy-950);
+  font-weight: 700;
+  line-height: 1.25;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+h1 { font-size: 2.25rem; letter-spacing: -0.025em; }
+h2 { font-size: 1.75rem; letter-spacing: -0.02em; }
+h3 { font-size: 1.35rem; }
+h4 { font-size: 1.15rem; }
+p { margin-top: 0; margin-bottom: 1rem; color: var(--gt-navy-600); }
+a { color: var(--gt-primary); text-decoration: none; transition: color var(--gt-transition); }
+a:hover { color: var(--gt-primary-hover); }
+
+/* Container Utilities */
+.gt-container {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.gt-container-narrow {
+  max-width: 860px;
+}
+
+/* ==========================================================================
+   3. Buttons & Interactive Elements
+   ========================================================================== */
+.gt-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--gt-font-display);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 0.7rem 1.4rem;
+  border-radius: var(--gt-radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--gt-transition);
+  white-space: nowrap;
+}
+
+.gt-btn:focus-visible {
+  outline: 2px solid var(--gt-primary);
+  outline-offset: 2px;
+}
+
+.gt-btn-primary {
+  background-color: var(--gt-primary);
+  color: #ffffff;
+  border-color: var(--gt-primary);
+  box-shadow: 0 1px 3px rgba(2, 132, 199, 0.25);
+}
+.gt-btn-primary:hover {
+  background-color: var(--gt-primary-hover);
+  border-color: var(--gt-primary-hover);
+  color: #ffffff;
+  box-shadow: var(--gt-shadow-md);
+  transform: translateY(-1px);
+}
+.gt-btn-primary:active {
+  background-color: var(--gt-primary-active);
+  transform: translateY(0);
+}
+
+.gt-btn-secondary {
+  background-color: #ffffff;
+  color: var(--gt-navy-800);
+  border-color: var(--gt-border);
+  box-shadow: var(--gt-shadow-xs);
+}
+.gt-btn-secondary:hover {
+  background-color: var(--gt-bg-muted);
+  border-color: var(--gt-border-hover);
+  color: var(--gt-navy-950);
+}
+
+.gt-btn-outline {
+  background-color: transparent;
+  color: var(--gt-primary);
+  border-color: var(--gt-primary);
+}
+.gt-btn-outline:hover {
+  background-color: var(--gt-primary-light);
+  color: var(--gt-primary-hover);
+}
+
+.gt-btn-danger {
+  background-color: #dc2626;
+  color: #ffffff;
+}
+.gt-btn-danger:hover {
+  background-color: #b91c1c;
+}
+
+.gt-btn-sm {
+  padding: 0.45rem 0.85rem;
+  font-size: 0.8125rem;
+  border-radius: var(--gt-radius-sm);
+}
+
+.gt-btn-lg {
+  padding: 0.9rem 1.85rem;
+  font-size: 1.0625rem;
+  border-radius: var(--gt-radius-lg);
+}
+
+.gt-btn-block {
+  display: flex;
+  width: 100%;
+}
+
+/* ==========================================================================
+   4. Form Controls & Inputs
+   ========================================================================== */
+.gt-form-group {
+  margin-bottom: 1.25rem;
+  text-align: left;
+}
+
+.gt-label {
+  display: block;
+  font-family: var(--gt-font-display);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--gt-navy-900);
+  margin-bottom: 0.375rem;
+}
+
+.gt-input, .gt-select, .gt-textarea {
+  width: 100%;
+  font-family: var(--gt-font-body);
+  font-size: 0.9375rem;
+  color: var(--gt-navy-900);
+  background-color: #ffffff;
+  border: 1px solid var(--gt-border);
+  border-radius: var(--gt-radius-md);
+  padding: 0.6875rem 0.875rem;
+  transition: border-color var(--gt-transition), box-shadow var(--gt-transition);
+}
+
+.gt-input:focus, .gt-select:focus, .gt-textarea:focus {
+  outline: none;
+  border-color: var(--gt-primary);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.gt-input::placeholder, .gt-textarea::placeholder {
+  color: var(--gt-navy-400);
+}
+
+.gt-textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.gt-form-hint {
+  font-size: 0.8125rem;
+  color: var(--gt-navy-500);
+  margin-top: 0.25rem;
+}
+
+.gt-form-error {
+  font-size: 0.8125rem;
+  color: #dc2626;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+/* Tracking Input Widget (Hero & Search) */
+.gt-track-widget {
+  display: flex;
+  background: #ffffff;
+  padding: 0.375rem;
+  border-radius: var(--gt-radius-lg);
+  box-shadow: var(--gt-shadow-lg);
+  border: 1px solid var(--gt-border);
+  transition: all var(--gt-transition);
+}
+
+.gt-track-widget:focus-within {
+  border-color: var(--gt-primary);
+  box-shadow: var(--gt-shadow-hover);
+}
+
+.gt-track-widget input {
+  flex: 1;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+  font-family: var(--gt-font-body);
+  color: var(--gt-navy-900);
+  background: transparent;
+  outline: none;
+}
+
+.gt-track-widget button {
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--gt-radius-md);
+}
+
+/* ==========================================================================
+   5. Cards, Stats & Surfaces
+   ========================================================================== */
+.gt-card {
+  background: var(--gt-bg-card);
+  border: 1px solid var(--gt-border);
+  border-radius: var(--gt-radius-lg);
+  box-shadow: var(--gt-shadow-xs);
+  transition: transform var(--gt-transition), box-shadow var(--gt-transition);
+  overflow: hidden;
+}
+
+.gt-card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--gt-shadow-md);
+  border-color: var(--gt-border-hover);
+}
+
+.gt-card-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--gt-border);
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gt-card-body {
+  padding: 1.5rem;
+}
+
+.gt-card-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--gt-border);
+  background: var(--gt-bg-muted);
+}
+
+/* Stat Cards for Dashboard */
+.gt-stat-card {
+  background: #ffffff;
+  border: 1px solid var(--gt-border);
+  border-radius: var(--gt-radius-lg);
+  padding: 1rem 1.15rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  box-shadow: var(--gt-shadow-xs);
+  position: relative;
+  overflow: hidden;
+}
+
+.gt-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gt-primary);
+}
+
+.gt-stat-card.stat-success::before { background: var(--gt-status-delivered-text); }
+.gt-stat-card.stat-warning::before { background: var(--gt-status-created-text); }
+.gt-stat-card.stat-accent::before { background: var(--gt-accent); }
+
+.gt-stat-info .gt-stat-label {
+  font-size: 0.75rem;
+  color: var(--gt-navy-500);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  line-height: 1.25;
+}
+
+.gt-stat-info .gt-stat-value {
+  font-family: var(--gt-font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--gt-navy-950);
+  line-height: 1.1;
+}
+
+.gt-stat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--gt-radius-md);
+  background: var(--gt-primary-light);
+  color: var(--gt-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   6. Badges & Status Indicators
+   ========================================================================== */
+.gt-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-family: var(--gt-font-display);
+  font-size: 0.78125rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--gt-radius-full);
+  text-transform: capitalize;
+}
+
+.gt-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.gt-badge-0 { background: var(--gt-status-created-bg); color: var(--gt-status-created-text); } /* Accepted */
+.gt-badge-1 { background: #eff6ff; color: #1d4ed8; } /* Collected */
+.gt-badge-2 { background: #f3e8ff; color: #6b21a8; } /* Shipped */
+.gt-badge-3 { background: var(--gt-status-transit-bg); color: var(--gt-status-transit-text); } /* In-Transit */
+.gt-badge-4 { background: #e0e7ff; color: #3730a3; } /* Arrived Dest */
+.gt-badge-5 { background: #fef08a; color: #854d0e; } /* Out for Delivery */
+.gt-badge-6 { background: #ccfbf1; color: #0f766e; } /* Ready Pickup */
+.gt-badge-7 { background: var(--gt-status-delivered-bg); color: var(--gt-status-delivered-text); } /* Delivered */
+.gt-badge-8 { background: #d1fae5; color: #065f46; } /* Picked-up */
+.gt-badge-9 { background: var(--gt-status-failed-bg); color: var(--gt-status-failed-text); } /* Unsuccessful */
+
+.gt-badge-primary { background: var(--gt-primary-light); color: var(--gt-primary-active); }
+.gt-badge-neutral { background: var(--gt-bg-muted); color: var(--gt-navy-700); }
+
+/* ==========================================================================
+   7. Tracking Timeline Component
+   ========================================================================== */
+.gt-timeline {
+  position: relative;
+  padding-left: 2rem;
+  margin: 1.5rem 0;
+}
+
+.gt-timeline::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 8px;
+  width: 2px;
+  background: var(--gt-border);
+}
+
+.gt-timeline-item {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.gt-timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.gt-timeline-dot {
+  position: absolute;
+  left: -2rem;
+  top: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 3px solid var(--gt-primary);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.gt-timeline-item.is-completed .gt-timeline-dot {
+  background: var(--gt-primary);
+  border-color: #ffffff;
+}
+
+.gt-timeline-content {
+  background: #ffffff;
+  border: 1px solid var(--gt-border);
+  border-radius: var(--gt-radius-md);
+  padding: 0.875rem 1.125rem;
+  box-shadow: var(--gt-shadow-xs);
+}
+
+.gt-timeline-status {
+  font-family: var(--gt-font-display);
+  font-weight: 700;
+  color: var(--gt-navy-950);
+  font-size: 0.9375rem;
+}
+
+.gt-timeline-time {
+  font-size: 0.8125rem;
+  color: var(--gt-navy-500);
+  margin-top: 0.15rem;
+}
+
+/* ==========================================================================
+   8. Alerts, Notices & Modals
+   ========================================================================== */
+.gt-alert {
+  padding: 0.875rem 1.125rem;
+  border-radius: var(--gt-radius-md);
+  font-size: 0.9375rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.gt-alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.gt-alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.gt-alert-info { background: #e0f2fe; color: #075985; border: 1px solid #bae6fd; }
+.gt-alert-warning { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+
+/* Empty States */
+.gt-empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: #ffffff;
+  border: 2px dashed var(--gt-border);
+  border-radius: var(--gt-radius-lg);
+}
+
+.gt-empty-state-icon {
+  font-size: 2.5rem;
+  color: var(--gt-navy-400);
+  margin-bottom: 0.75rem;
+}
+
+.gt-empty-state-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--gt-navy-900);
+  margin-bottom: 0.25rem;
+}
+
+.gt-empty-state-desc {
+  font-size: 0.875rem;
+  color: var(--gt-navy-500);
+  max-width: 400px;
+  margin: 0 auto 1.25rem auto;
+}
+
+/* Tables */
+.gt-table-container {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--gt-border);
+  border-radius: var(--gt-radius-lg);
+  background: #ffffff;
+  box-shadow: var(--gt-shadow-xs);
+}
+
+.gt-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.gt-table th {
+  background: var(--gt-bg-muted);
+  color: var(--gt-navy-700);
+  font-family: var(--gt-font-display);
+  font-weight: 600;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--gt-border);
+}
+
+.gt-table td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--gt-border);
+  color: var(--gt-navy-800);
+  vertical-align: middle;
+}
+
+.gt-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.gt-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* ==========================================================================
+   9. Public Website Header & Navigation
+   ========================================================================== */
+.gt-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--gt-border);
+  transition: all var(--gt-transition);
+}
+
+.gt-nav-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+}
+
+.gt-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+}
+
+.gt-brand-logo {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--gt-primary), #0284c7);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--gt-radius-md);
+  font-size: 1.25rem;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
+}
+
+.gt-brand-title {
+  font-family: var(--gt-font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--gt-navy-950);
+  letter-spacing: -0.02em;
+}
+
+.gt-brand-title span {
+  color: var(--gt-primary);
+}
+
+.gt-nav-menu {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 0.5rem;
+}
+
+.gt-nav-link {
+  font-family: var(--gt-font-display);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--gt-navy-700);
+  padding: 0.5rem 0.875rem;
+  border-radius: var(--gt-radius-md);
+  transition: all var(--gt-transition);
+}
+
+.gt-nav-link:hover {
+  color: var(--gt-primary);
+  background: var(--gt-primary-subtle);
+}
+
+.gt-nav-link.active {
+  color: var(--gt-primary);
+  background: var(--gt-primary-light);
+  font-weight: 600;
+}
+
+.gt-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.gt-mobile-toggle {
+  display: none;
+  background: none;
+  border: 1px solid var(--gt-border);
+  padding: 0.5rem;
+  border-radius: var(--gt-radius-md);
+  cursor: pointer;
+  color: var(--gt-navy-800);
+}
+
+/* ==========================================================================
+   10. Public Footer
+   ========================================================================== */
+.gt-footer {
+  background: var(--gt-navy-950);
+  color: var(--gt-navy-400);
+  padding-top: 4rem;
+  padding-bottom: 2rem;
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.gt-footer h4 {
+  color: #ffffff;
+  font-size: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.gt-footer a {
+  color: var(--gt-navy-400);
+  transition: color var(--gt-transition);
+}
+
+.gt-footer a:hover {
+  color: #ffffff;
+}
+
+.gt-footer-bottom {
+  margin-top: 3.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.875rem;
+}
+
+/* ==========================================================================
+   11. Responsiveness & Media Queries
+   ========================================================================== */
+@media (max-width: 900px) {
+  .gt-mobile-toggle {
+    display: inline-flex;
+  }
+
+  .gt-nav-menu {
+    display: none;
+    position: absolute;
+    top: 72px;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    flex-direction: column;
+    padding: 1rem 1.5rem;
+    box-shadow: var(--gt-shadow-lg);
+    border-bottom: 1px solid var(--gt-border);
+  }
+
+  .gt-nav-menu.is-open {
+    display: flex;
+  }
+
+  .gt-nav-link {
+    width: 100%;
+    padding: 0.75rem 1rem;
+  }
+
+  .gt-track-widget {
+    flex-direction: column;
+    padding: 0.5rem;
+  }
+
+  .gt-track-widget button {
+    width: 100%;
+  }
+
+  .gt-footer-bottom {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+}
+
+/* ==========================================================================
+   12. Accessibility (a11y) & Touch Enhancements
+   ========================================================================== */
+.gt-skip-link {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  background: var(--gt-navy-950);
+  color: #ffffff;
+  padding: 0.75rem 1.25rem;
+  z-index: 99999;
+  border-radius: var(--gt-radius-md);
+  font-weight: 700;
+  text-decoration: none;
+  border: 2px solid var(--gt-primary);
+  box-shadow: var(--gt-shadow-lg);
+  transition: top 0.2s ease-in-out;
+}
+
+.gt-skip-link:focus {
+  top: 1rem;
+  outline: 3px solid var(--gt-primary);
+  outline-offset: 2px;
+}
+
+/* Screen reader only utility */
+.gt-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* High-contrast focus indicator for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--gt-primary);
+  outline-offset: 2px;
+}
+
+/* Mobile Touch Target minimum sizing (44x44px per WCAG 2.5.5) */
+@media (max-width: 768px) {
+  .gt-btn {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .gt-mobile-toggle {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .gt-nav-link {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  .gt-input, .gt-select, .gt-textarea {
+    min-height: 44px;
+  }
+}
+
+/* Enhanced smooth scrolling on mobile table overflows */
+.gt-table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+

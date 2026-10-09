@@ -1,0 +1,17 @@
+# GaaTiTrack Root Security Rules
+
+# Prevent directory indexing
+Options -Indexes
+
+# Protect sensitive files and directories
+<FilesMatch "^\.env|\.sql$|\.log$|\.md$|composer\.(json|lock)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Block access to backup, credentials, tests, and sensitive directories
+RedirectMatch 404 ^/courer/(_backup_original|Credentials|Database|logs|tests)(/.*)?$
