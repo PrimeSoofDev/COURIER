@@ -76,6 +76,7 @@ CREATE TABLE `parcels` (
   `length` varchar(100) NOT NULL,
   `price` float NOT NULL,
   `status` int(2) NOT NULL DEFAULT 0,
+  `parcel_image` varchar(255) NOT NULL DEFAULT '',
   `date_created` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 

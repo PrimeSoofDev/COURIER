@@ -239,6 +239,27 @@ require_once __DIR__ . '/../header.php';
 
   </div>
 
+  <?php if (!empty($parcel['parcel_image']) && file_exists(__DIR__ . '/../../assets/uploads/parcels/' . $parcel['parcel_image'])): ?>
+    <!-- Verified Consignment Cargo Photo -->
+    <div style="margin-bottom: 1.75rem; background: var(--gt-bg-muted); border: 1px solid var(--gt-border); border-radius: var(--gt-radius-md); padding: 1.25rem;">
+      <div style="font-size: 0.8125rem; font-weight: 700; color: var(--gt-navy-900); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 6px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Verified Consignment Cargo Photo
+      </div>
+      <div style="display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap;">
+        <a href="<?php echo APP_URL . '/assets/uploads/parcels/' . e($parcel['parcel_image']); ?>" target="_blank" title="Click to view full size">
+          <img src="<?php echo APP_URL . '/assets/uploads/parcels/' . e($parcel['parcel_image']); ?>" 
+               alt="Consignment Cargo Photo" 
+               style="max-width: 220px; max-height: 160px; object-fit: cover; border-radius: 8px; border: 1px solid var(--gt-border); box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+        </a>
+        <div style="font-size: 0.8125rem; color: var(--gt-navy-600); line-height: 1.5;">
+          <div><strong>Verification:</strong> Intake visual inspection complete &bull; Attached to manifest</div>
+          <div style="color: var(--gt-navy-400); font-size: 0.75rem; margin-top: 4px;">Click photo to open full-resolution inspection view in a new window.</div>
+        </div>
+      </div>
+    </div>
+  <?php endif; ?>
+
   <!-- Package Specifications & Charges -->
   <div style="margin-bottom: 1.75rem;">
     <div style="font-size: 0.875rem; font-weight: 700; color: var(--gt-navy-900); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em;">

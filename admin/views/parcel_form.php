@@ -27,6 +27,7 @@ $formData = [
     'type'             => 1,
     'from_branch_id'   => is_admin() ? '' : user_branch_id(),
     'to_branch_id'     => '',
+    'parcel_image'     => '',
     'items'            => [['weight' => '', 'height' => '', 'width' => '', 'length' => '', 'price' => '']]
 ];
 
@@ -45,6 +46,7 @@ if ($isEditing) {
             'type'           => (int)$existing['type'],
             'from_branch_id' => $existing['from_branch_id'],
             'to_branch_id'   => $existing['to_branch_id'],
+            'parcel_image'   => $existing['parcel_image'] ?? '',
             'items' => [['weight'=>$existing['weight'],'height'=>$existing['height'],
                          'width'=>$existing['width'],'length'=>$existing['length'],'price'=>$existing['price']]],
         ]);
@@ -85,50 +87,92 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         } elseif (empty($weights) || empty($prices)) {
             $errorMsg = 'Please include at least one parcel item specification.';
         } else {
-            try {
-                $pdo->beginTransaction();
-                if ($isEditing) {
-                    $priceVal = (float)str_replace(',', '', $prices[0] ?? 0);
-                    $upStmt = $pdo->prepare("UPDATE parcels SET
-                        sender_name=:sname,sender_address=:saddr,sender_contact=:scontact,
-                        recipient_name=:rname,recipient_address=:raddr,recipient_contact=:rcontact,
-                        type=:type,from_branch_id=:fbid,to_branch_id=:tbid,
-                        weight=:weight,height=:height,width=:width,length=:length,price=:price WHERE id=:id");
-                    $upStmt->execute([
-                        ':sname'=>$sender_name,':saddr'=>$sender_address,':scontact'=>$sender_contact,
-                        ':rname'=>$recipient_name,':raddr'=>$recipient_address,':rcontact'=>$recipient_contact,
-                        ':type'=>$type,':fbid'=>$from_branch_id,':tbid'=>$to_branch_id,
-                        ':weight'=>trim($weights[0]??''),':height'=>trim($heights[0]??''),
-                        ':width'=>trim($widths[0]??''),':length'=>trim($lengths[0]??''),
-                        ':price'=>$priceVal,':id'=>$editId
-                    ]);
-                    $pdo->commit();
-                    app_log("Consignment updated: ID {$editId} by user " . current_user_id());
-                    $_SESSION['flash_success'] = "Consignment #{$existing['reference_number']} updated successfully.";
-                    header("Location: " . APP_URL . "/admin/index.php?page=view_parcel&id=" . $editId);
-                    exit;
+            // Process optional consignment cargo photo
+            $parcelImgPath = $existing['parcel_image'] ?? '';
+            if (isset($_FILES['parcel_image']) && $_FILES['parcel_image']['error'] !== UPLOAD_ERR_NO_FILE) {
+                $file = $_FILES['parcel_image'];
+                if ($file['error'] !== UPLOAD_ERR_OK) {
+                    $errorMsg = 'File upload error (code ' . $file['error'] . ').';
+                } elseif ($file['size'] > 5 * 1024 * 1024) {
+                    $errorMsg = 'Consignment photo exceeds the 5MB size limit.';
                 } else {
-                    $createdIds = []; $lastRef = '';
-                    $inStmt = $pdo->prepare("INSERT INTO parcels (reference_number,sender_name,sender_address,sender_contact,recipient_name,recipient_address,recipient_contact,type,from_branch_id,to_branch_id,weight,height,width,length,price,status,date_created) VALUES (:ref,:sname,:saddr,:scontact,:rname,:raddr,:rcontact,:type,:fbid,:tbid,:weight,:height,:width,:length,:price,0,NOW())");
-                    $trStmt = $pdo->prepare("INSERT INTO parcel_tracks (parcel_id,status,date_created) VALUES (:pid,0,NOW())");
-                    foreach ($weights as $k => $w) {
-                        $refNum = generate_unique_reference($pdo); $lastRef = $refNum;
-                        $pVal   = (float)str_replace(',', '', $prices[$k] ?? 0);
-                        $inStmt->execute([':ref'=>$refNum,':sname'=>$sender_name,':saddr'=>$sender_address,':scontact'=>$sender_contact,':rname'=>$recipient_name,':raddr'=>$recipient_address,':rcontact'=>$recipient_contact,':type'=>$type,':fbid'=>$from_branch_id,':tbid'=>$to_branch_id,':weight'=>trim($w),':height'=>trim($heights[$k]??''),':width'=>trim($widths[$k]??''),':length'=>trim($lengths[$k]??''),':price'=>$pVal]);
-                        $newId = (int)$pdo->lastInsertId();
-                        $createdIds[] = $newId;
-                        $trStmt->execute([':pid' => $newId]);
+                    $allowedMimes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+                    $finfo = new finfo(FILEINFO_MIME_TYPE);
+                    $mimeType = $finfo->file($file['tmp_name']);
+                    if (!array_key_exists($mimeType, $allowedMimes)) {
+                        $errorMsg = 'Invalid image format. Only JPG, PNG, and WebP are allowed.';
+                    } else {
+                        $ext = $allowedMimes[$mimeType];
+                        $safeFileName = 'parcel_' . bin2hex(random_bytes(8)) . '.' . $ext;
+                        $uploadDir = __DIR__ . '/../../assets/uploads/parcels/';
+                        if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+                        if (move_uploaded_file($file['tmp_name'], $uploadDir . $safeFileName)) {
+                            if (!empty($parcelImgPath) && strpos($parcelImgPath, 'parcel_') === 0 && file_exists($uploadDir . $parcelImgPath)) {
+                                @unlink($uploadDir . $parcelImgPath);
+                            }
+                            $parcelImgPath = $safeFileName;
+                        } else {
+                            $errorMsg = 'Failed to save uploaded consignment image.';
+                        }
                     }
-                    $pdo->commit();
-                    app_log("Created " . count($createdIds) . " consignment(s). Last: {$lastRef}");
-                    $_SESSION['flash_success'] = "Consignment booked! Reference: #{$lastRef}";
-                    header("Location: " . APP_URL . "/admin/index.php?page=view_parcel&id=" . $createdIds[0]);
-                    exit;
                 }
-            } catch (PDOException $e) {
-                $pdo->rollBack();
-                app_log("Consignment save error: " . $e->getMessage(), 'ERROR');
-                $errorMsg = 'Database error while saving consignment.';
+            }
+
+            if (empty($errorMsg)) {
+                try {
+                    $pdo->beginTransaction();
+                    if ($isEditing) {
+                        $priceVal = (float)str_replace(',', '', $prices[0] ?? 0);
+                        $upStmt = $pdo->prepare("UPDATE parcels SET
+                            sender_name=:sname,sender_address=:saddr,sender_contact=:scontact,
+                            recipient_name=:rname,recipient_address=:raddr,recipient_contact=:rcontact,
+                            type=:type,from_branch_id=:fbid,to_branch_id=:tbid,
+                            parcel_image=:img,
+                            weight=:weight,height=:height,width=:width,length=:length,price=:price WHERE id=:id");
+                        $upStmt->execute([
+                            ':sname'=>$sender_name,':saddr'=>$sender_address,':scontact'=>$sender_contact,
+                            ':rname'=>$recipient_name,':raddr'=>$recipient_address,':rcontact'=>$recipient_contact,
+                            ':type'=>$type,':fbid'=>$from_branch_id,':tbid'=>$to_branch_id,
+                            ':img'=>$parcelImgPath,
+                            ':weight'=>trim($weights[0]??''),':height'=>trim($heights[0]??''),
+                            ':width'=>trim($widths[0]??''),':length'=>trim($lengths[0]??''),
+                            ':price'=>$priceVal,':id'=>$editId
+                        ]);
+                        $pdo->commit();
+                        app_log("Consignment updated: ID {$editId} by user " . current_user_id());
+                        $_SESSION['flash_success'] = "Consignment #{$existing['reference_number']} updated successfully.";
+                        header("Location: " . APP_URL . "/admin/index.php?page=view_parcel&id=" . $editId);
+                        exit;
+                    } else {
+                        $createdIds = []; $lastRef = '';
+                        $inStmt = $pdo->prepare("INSERT INTO parcels (reference_number,sender_name,sender_address,sender_contact,recipient_name,recipient_address,recipient_contact,type,from_branch_id,to_branch_id,parcel_image,weight,height,width,length,price,status,date_created) VALUES (:ref,:sname,:saddr,:scontact,:rname,:raddr,:rcontact,:type,:fbid,:tbid,:img,:weight,:height,:width,:length,:price,0,NOW())");
+                        $trStmt = $pdo->prepare("INSERT INTO parcel_tracks (parcel_id,status,date_created) VALUES (:pid,0,NOW())");
+                        foreach ($weights as $k => $w) {
+                            $refNum = generate_unique_reference($pdo); $lastRef = $refNum;
+                            $pVal   = (float)str_replace(',', '', $prices[$k] ?? 0);
+                            $inStmt->execute([
+                                ':ref'=>$refNum,':sname'=>$sender_name,':saddr'=>$sender_address,':scontact'=>$sender_contact,
+                                ':rname'=>$recipient_name,':raddr'=>$recipient_address,':rcontact'=>$recipient_contact,
+                                ':type'=>$type,':fbid'=>$from_branch_id,':tbid'=>$to_branch_id,
+                                ':img'=>$parcelImgPath,
+                                ':weight'=>trim($w),':height'=>trim($heights[$k]??''),':width'=>trim($widths[$k]??''),
+                                ':length'=>trim($lengths[$k]??''),':price'=>$pVal
+                            ]);
+                            $newId = (int)$pdo->lastInsertId();
+                            $createdIds[] = $newId;
+                            $trStmt->execute([':pid' => $newId]);
+                        }
+                        $pdo->commit();
+                        app_log("Created " . count($createdIds) . " consignment(s). Last: {$lastRef}");
+                        $_SESSION['flash_success'] = "Consignment booked! Reference: #{$lastRef}";
+                        header("Location: " . APP_URL . "/admin/index.php?page=view_parcel&id=" . $createdIds[0]);
+                        exit;
+                    }
+                } catch (PDOException $e) {
+                    $pdo->rollBack();
+                    app_log("Consignment save error: " . $e->getMessage(), 'ERROR');
+                    $errorMsg = 'Database error while saving consignment.';
+                }
             }
         }
     }
@@ -301,7 +345,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     </div>
   <?php endif; ?>
 
-  <form action="" method="POST" id="parcel-form">
+  <form action="" method="POST" id="parcel-form" enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="<?php echo csrf_token(); ?>">
 
     <!-- Sender & Recipient -->
@@ -428,6 +472,56 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
       </div>
     </div>
 
+    <!-- Consignment Visual Inspection & Photos -->
+    <div class="form-section">
+      <div class="form-section-header">
+        <div class="form-section-icon" style="background:#fdf4ff;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <div>
+          <div class="form-section-title">Consignment Cargo Photo</div>
+          <div class="form-section-sub">Upload a package photo or intake inspection image (visible on tracking portal)</div>
+        </div>
+      </div>
+      <div class="form-section-body" style="padding:1.25rem 1.5rem;">
+        <?php
+          $hasParcelImg = !empty($formData['parcel_image']) &&
+                          file_exists(__DIR__ . '/../../assets/uploads/parcels/' . $formData['parcel_image']);
+        ?>
+        <div style="display:flex;gap:1.5rem;align-items:flex-start;flex-wrap:wrap;">
+          <!-- Preview Box -->
+          <div style="flex-shrink:0;">
+            <div id="parcel-preview-container" style="width:140px;height:105px;border-radius:10px;border:1.5px solid #e2e8f0;display:flex;align-items:center;justify-content:center;background:#f8fafc;overflow:hidden;position:relative;">
+              <img id="parcel-preview-img"
+                   src="<?php echo $hasParcelImg ? APP_URL . '/assets/uploads/parcels/' . e($formData['parcel_image']) : ''; ?>"
+                   alt="Consignment Preview"
+                   style="width:100%;height:100%;object-fit:cover;<?php echo $hasParcelImg ? '' : 'display:none;'; ?>">
+              <div id="parcel-no-image" style="text-align:center;color:#94a3b8;font-size:0.75rem;padding:8px;<?php echo $hasParcelImg ? 'display:none;' : ''; ?>">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 4px;display:block;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                No photo
+              </div>
+            </div>
+            <div style="font-size:0.72rem;color:#94a3b8;text-align:center;margin-top:6px;">Cargo preview</div>
+          </div>
+
+          <!-- Upload Drop Area -->
+          <div style="flex:1;min-width:240px;">
+            <label for="parcel_image" style="display:block;border:2px dashed #cbd5e1;border-radius:12px;padding:1.5rem 1.25rem;text-align:center;cursor:pointer;background:#fafbfc;transition:border-color .18s,background .18s;" onmouseover="this.style.borderColor='#3b82f6';this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#cbd5e1';this.style.background='#fafbfc';">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <div style="font-size:.84rem;font-weight:700;color:#334155;margin-bottom:2px;">Click to select or drag package image</div>
+              <div style="font-size:.75rem;color:#94a3b8;">Supported formats: JPG, PNG, WebP &bull; Max 5 MB</div>
+              <div id="parcel-file-indicator" style="display:none;margin-top:10px;font-size:0.78rem;color:#1d4ed8;font-weight:600;background:#eff6ff;border:1px solid #bfdbfe;padding:5px 12px;border-radius:8px;align-items:center;justify-content:center;gap:6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span id="parcel-file-name"></span>
+              </div>
+              <input type="file" id="parcel_image" name="parcel_image" accept="image/jpeg,image/png,image/webp" style="display:none;">
+            </label>
+            <div class="f-hint" style="margin-top:6px;">Optional. High-resolution package photos provide customers visual proof of cargo custody upon intake.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Package Dimensions & Pricing -->
     <div class="form-section">
       <div class="form-section-header">
@@ -535,6 +629,35 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
   });
 
   calcTotal();
+
+  const parcelInput = document.getElementById('parcel_image');
+  const previewImg  = document.getElementById('parcel-preview-img');
+  const noImgBox    = document.getElementById('parcel-no-image');
+  const fileInd     = document.getElementById('parcel-file-indicator');
+  const fileNameTxt = document.getElementById('parcel-file-name');
+
+  if (parcelInput) {
+    parcelInput.addEventListener('change', function(e) {
+      const file = e.target.files && e.target.files[0];
+      if (file) {
+        if (fileNameTxt && fileInd) {
+          fileNameTxt.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+          fileInd.style.display = 'inline-flex';
+        }
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          if (previewImg) {
+            previewImg.src = evt.target.result;
+            previewImg.style.display = 'block';
+          }
+          if (noImgBox) {
+            noImgBox.style.display = 'none';
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
 })();
 </script>
 

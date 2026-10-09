@@ -533,6 +533,40 @@ require_once __DIR__ . '/includes/public_header.php';
               </div>
             </div>
           </div>
+
+          <?php 
+            $hasParcelPhoto = !empty($parcel['parcel_image']) && 
+                              file_exists(__DIR__ . '/assets/uploads/parcels/' . $parcel['parcel_image']);
+          ?>
+          <?php if ($hasParcelPhoto): ?>
+            <!-- Verified Consignment Cargo Photo -->
+            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0; display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;">
+              <div style="position: relative; border-radius: 12px; overflow: hidden; border: 2px solid #e2e8f0; box-shadow: 0 4px 14px rgba(0,0,0,0.06); flex-shrink: 0; background: #0f172a;">
+                <a href="<?php echo APP_URL . '/assets/uploads/parcels/' . e($parcel['parcel_image']); ?>" target="_blank" title="Click to inspect full resolution">
+                  <img src="<?php echo APP_URL . '/assets/uploads/parcels/' . e($parcel['parcel_image']); ?>" 
+                       alt="Verified Consignment Cargo" 
+                       style="max-width: 220px; max-height: 150px; width: 100%; object-fit: cover; display: block; transition: transform .25s ease;"
+                       onmouseover="this.style.transform='scale(1.04)'"
+                       onmouseout="this.style.transform='scale(1)'">
+                </a>
+                <div style="position: absolute; bottom: 6px; right: 6px; background: rgba(15,23,42,0.75); backdrop-filter: blur(4px); color: #fff; font-size: 0.68rem; padding: 2px 7px; border-radius: 6px; font-weight: 600; pointer-events: none;">
+                  🔍 Enlarge
+                </div>
+              </div>
+              <div style="flex: 1; min-width: 220px;">
+                <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 700; color: #15803d; background: #dcfce7; padding: 3px 10px; border-radius: 9999px; margin-bottom: 6px;">
+                  <span>✓</span> Intake Visual Inspection Verified
+                </div>
+                <div style="font-size: 0.95rem; font-weight: 700; color: var(--gt-navy-950); margin-bottom: 4px;">
+                  Official Consignment Cargo Photo
+                </div>
+                <div style="font-size: 0.8125rem; color: var(--gt-navy-600); line-height: 1.5;">
+                  Original package intake snapshot photographed upon origin dispatch custody at <?php echo e($originCoords['city']); ?> Hub. Click image to inspect full high-resolution cargo photo.
+                </div>
+              </div>
+            </div>
+          <?php endif; ?>
+
         </div>
       </div>
 

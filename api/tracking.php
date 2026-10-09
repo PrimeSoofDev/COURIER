@@ -59,7 +59,7 @@ if (!preg_match('/^[a-zA-Z0-9\-_]{6,30}$/', $ref)) {
 
 try {
     // Query parcel
-    $stmt = $pdo->prepare("SELECT id, reference_number, type, from_branch_id, to_branch_id, sender_address, weight, height, width, length, price, status, date_created, recipient_name, recipient_address FROM parcels WHERE reference_number = :ref LIMIT 1");
+    $stmt = $pdo->prepare("SELECT id, reference_number, type, from_branch_id, to_branch_id, sender_address, weight, height, width, length, price, status, parcel_image, date_created, recipient_name, recipient_address FROM parcels WHERE reference_number = :ref LIMIT 1");
     $stmt->execute([':ref' => $ref]);
     $parcel = $stmt->fetch();
 
@@ -192,6 +192,7 @@ try {
         'masked_recipient' => $maskedRecipient,
         'weight' => $parcel['weight'],
         'dimensions' => $parcel['length'] . 'x' . $parcel['width'] . 'x' . $parcel['height'],
+        'parcel_image' => (!empty($parcel['parcel_image']) && file_exists(__DIR__ . '/../assets/uploads/parcels/' . $parcel['parcel_image'])) ? APP_URL . '/assets/uploads/parcels/' . $parcel['parcel_image'] : null,
         'waypoints' => $routeWaypoints,
         'timeline' => array_reverse($events) // latest first for display
     ], JSON_UNESCAPED_SLASHES);
