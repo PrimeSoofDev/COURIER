@@ -5,9 +5,14 @@
 logs/*.log
 *.log
 
+# Uploads
+assets/uploads/parcels/*
+!assets/uploads/parcels/.gitkeep
+
 # OS & Editor generated files
 .DS_Store
 Thumbs.db
 desktop.ini
 .vscode/
 .idea/
+

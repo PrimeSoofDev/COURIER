@@ -63,10 +63,12 @@ CREATE TABLE `parcels` (
   `reference_number` varchar(100) NOT NULL,
   `sender_name` text NOT NULL,
   `sender_address` text NOT NULL,
-  `sender_contact` text NOT NULL,
+  `sender_contact` text DEFAULT NULL,
+  `sender_email` varchar(200) NOT NULL DEFAULT '',
   `recipient_name` text NOT NULL,
   `recipient_address` text NOT NULL,
-  `recipient_contact` text NOT NULL,
+  `recipient_contact` text DEFAULT NULL,
+  `recipient_email` varchar(200) NOT NULL DEFAULT '',
   `type` int(1) NOT NULL COMMENT '1 = Deliver, 2=Pickup',
   `from_branch_id` varchar(30) NOT NULL,
   `to_branch_id` varchar(30) NOT NULL,
@@ -79,6 +81,7 @@ CREATE TABLE `parcels` (
   `parcel_image` varchar(255) NOT NULL DEFAULT '',
   `date_created` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 --
 -- Dumping data for table `parcels`
@@ -143,8 +146,17 @@ CREATE TABLE `system_settings` (
   `contact` varchar(20) NOT NULL,
   `address` text NOT NULL,
   `cover_img` text NOT NULL,
-  `api_key` varchar(512) NOT NULL DEFAULT ''
+  `api_key` varchar(512) NOT NULL DEFAULT '',
+  `smtp_host` varchar(255) NOT NULL DEFAULT 'sandbox.smtp.mailtrap.io',
+  `smtp_port` varchar(10) NOT NULL DEFAULT '2525',
+  `smtp_user` varchar(255) NOT NULL DEFAULT '',
+  `smtp_pass` varchar(255) NOT NULL DEFAULT '',
+  `smtp_security` varchar(10) NOT NULL DEFAULT 'tls',
+  `mail_from_address` varchar(255) NOT NULL DEFAULT 'no-reply@gaatitrack.com',
+  `mail_from_name` varchar(255) NOT NULL DEFAULT 'GaaTiTrack Logistics',
+  `mail_driver` varchar(20) NOT NULL DEFAULT 'smtp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 --
 -- Dumping data for table `system_settings`

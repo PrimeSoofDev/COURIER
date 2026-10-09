@@ -206,7 +206,10 @@ require_once __DIR__ . '/../header.php';
         <?php echo e($parcel['sender_name']); ?>
       </div>
       <div style="font-size: 0.875rem; color: var(--gt-navy-700); margin-bottom: 4px;">
-        <strong>Phone:</strong> <?php echo e($parcel['sender_contact']); ?>
+        <strong>Email:</strong> <?php echo !empty($parcel['sender_email']) ? e($parcel['sender_email']) : '<span style="color:#94a3b8;">N/A</span>'; ?>
+      </div>
+      <div style="font-size: 0.875rem; color: var(--gt-navy-700); margin-bottom: 4px;">
+        <strong>Phone:</strong> <?php echo !empty($parcel['sender_contact']) ? e($parcel['sender_contact']) : '<span style="color:#94a3b8;">N/A</span>'; ?>
       </div>
       <div style="font-size: 0.8125rem; color: var(--gt-navy-600); margin-bottom: 8px;">
         <strong>Address:</strong> <?php echo e($parcel['sender_address']); ?>
@@ -226,7 +229,10 @@ require_once __DIR__ . '/../header.php';
         <?php echo e($parcel['recipient_name']); ?>
       </div>
       <div style="font-size: 0.875rem; color: var(--gt-navy-700); margin-bottom: 4px;">
-        <strong>Phone:</strong> <?php echo e($parcel['recipient_contact']); ?>
+        <strong>Email:</strong> <?php echo !empty($parcel['recipient_email']) ? e($parcel['recipient_email']) : '<span style="color:#94a3b8;">N/A</span>'; ?>
+      </div>
+      <div style="font-size: 0.875rem; color: var(--gt-navy-700); margin-bottom: 4px;">
+        <strong>Phone:</strong> <?php echo !empty($parcel['recipient_contact']) ? e($parcel['recipient_contact']) : '<span style="color:#94a3b8;">N/A</span>'; ?>
       </div>
       <div style="font-size: 0.8125rem; color: var(--gt-navy-600); margin-bottom: 8px;">
         <strong>Delivery Address:</strong> <?php echo e($parcel['recipient_address']); ?>

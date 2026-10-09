@@ -86,7 +86,7 @@
 
 html {
   font-family: var(--gt-font-body);
-  font-size: 16px;
+  font-size: 14px;
   color: var(--gt-navy-800);
   background-color: var(--gt-bg-body);
   -webkit-font-smoothing: antialiased;
@@ -112,10 +112,10 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 0.75rem;
 }
 
-h1 { font-size: 2.25rem; letter-spacing: -0.025em; }
-h2 { font-size: 1.75rem; letter-spacing: -0.02em; }
-h3 { font-size: 1.35rem; }
-h4 { font-size: 1.15rem; }
+h1 { font-size: 2rem; letter-spacing: -0.025em; }
+h2 { font-size: 1.55rem; letter-spacing: -0.02em; }
+h3 { font-size: 1.2rem; }
+h4 { font-size: 1.05rem; }
 p { margin-top: 0; margin-bottom: 1rem; color: var(--gt-navy-600); }
 a { color: var(--gt-primary); text-decoration: none; transition: color var(--gt-transition); }
 a:hover { color: var(--gt-primary-hover); }

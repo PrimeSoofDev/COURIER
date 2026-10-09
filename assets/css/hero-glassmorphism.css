@@ -173,7 +173,7 @@
    ========================================================================== */
 .gt-hero-title {
   font-family: var(--gt-font-display, 'Plus Jakarta Sans', sans-serif);
-  font-size: clamp(2.3rem, 4.5vw, 3.5rem);
+  font-size: clamp(1.9rem, 3.8vw, 2.9rem);
   font-weight: 800;
   line-height: 1.14;
   letter-spacing: -0.025em;
@@ -190,7 +190,7 @@
 
 .gt-hero-desc {
   font-family: var(--gt-font-body, 'Inter', sans-serif);
-  font-size: clamp(1rem, 1.4vw, 1.15rem);
+  font-size: clamp(0.875rem, 1.2vw, 1rem);
   line-height: 1.65;
   color: #cbd5e1;
   margin: 0 0 2rem 0;

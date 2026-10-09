@@ -82,6 +82,25 @@ if($action == 'get_report'){
 	if($get)
 		echo $get;
 }
+if($action == 'save_system_settings'){
+	$save = $crud->save_system_settings();
+	if($save)
+		echo $save;
+}
+if($action == 'test_mailtrap'){
+	require_once 'includes/mailer.php';
+	$to = trim($_POST['test_email'] ?? 'test@example.com');
+	$cfg = get_mail_config();
+	if(!empty($_POST['smtp_host'])) $cfg['host'] = trim($_POST['smtp_host']);
+	if(!empty($_POST['smtp_port'])) $cfg['port'] = (int)$_POST['smtp_port'];
+	if(isset($_POST['smtp_user']))  $cfg['user'] = trim($_POST['smtp_user']);
+	if(isset($_POST['smtp_pass']))  $cfg['pass'] = trim($_POST['smtp_pass']);
+	$cfg['driver'] = 'smtp';
+	$res = send_smtp_socket($to, 'Mailtrap Tester', 'Mailtrap Test from GaaTiTrack', '<p>Test email dispatched via Mailtrap SMTP socket.</p>', $cfg);
+	header('Content-Type: application/json');
+	echo json_encode($res);
+	exit;
+}
 ob_end_flush();
 ?>
 <!--  Author Name: Mayuri K. 

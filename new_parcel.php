@@ -35,8 +35,12 @@
                 <input type="text" name="sender_address" id="" class="form-control " value="<?php echo isset($sender_address) ? $sender_address : '' ?>" required>
               </div>
               <div class="form-group">
-                <label for="" class="control-label">Contact #</label>
-                <input type="text" name="sender_contact" id="" class="form-control " value="<?php echo isset($sender_contact) ? $sender_contact : '' ?>" required>
+                <label for="" class="control-label">Contact # <small class="text-muted">(Optional)</small></label>
+                <input type="text" name="sender_contact" id="" class="form-control " value="<?php echo isset($sender_contact) ? $sender_contact : '' ?>">
+              </div>
+              <div class="form-group">
+                <label for="" class="control-label">Email <span class="text-danger">*</span></label>
+                <input type="email" name="sender_email" id="" class="form-control" placeholder="e.g. sender@example.com" value="<?php echo isset($sender_email) ? $sender_email : '' ?>" required>
               </div>
           </div>
           <div class="col-md-6">
@@ -50,8 +54,12 @@
                 <input type="text" name="recipient_address" id="" class="form-control " value="<?php echo isset($recipient_address) ? $recipient_address : '' ?>" required>
               </div>
               <div class="form-group">
-                <label for="" class="control-label">Contact #</label>
-                <input type="text" name="recipient_contact" id="" class="form-control " value="<?php echo isset($recipient_contact) ? $recipient_contact : '' ?>" required>
+                <label for="" class="control-label">Contact # <small class="text-muted">(Optional)</small></label>
+                <input type="text" name="recipient_contact" id="" class="form-control " value="<?php echo isset($recipient_contact) ? $recipient_contact : '' ?>">
+              </div>
+              <div class="form-group">
+                <label for="" class="control-label">Email <span class="text-danger">*</span></label>
+                <input type="email" name="recipient_email" id="" class="form-control" placeholder="e.g. recipient@example.com" value="<?php echo isset($recipient_email) ? $recipient_email : '' ?>" required>
               </div>
           </div>
         </div>

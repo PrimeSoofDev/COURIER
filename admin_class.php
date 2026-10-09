@@ -1,6 +1,9 @@
 <?php
 session_start();
 ini_set('display_errors', 1);
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/includes/mailer.php';
+
 Class Action {
 	private $db;
 
@@ -303,6 +306,23 @@ Class Action {
 			}
 		}
 		if(isset($save) && isset($ids)){
+			// Send booking confirmation emails (only for new parcels)
+			if(empty($id) && !empty($ids)){
+				// Build a data array for the email using posted data + last reference
+				$mail_parcel = array(
+					'reference_number'  => $ref ?? '',
+					'sender_name'       => $sender_name    ?? '',
+					'sender_email'      => $sender_email   ?? '',
+					'sender_address'    => $sender_address ?? '',
+					'sender_contact'    => $sender_contact ?? '',
+					'recipient_name'    => $recipient_name    ?? '',
+					'recipient_email'   => $recipient_email   ?? '',
+					'recipient_address' => $recipient_address ?? '',
+					'recipient_contact' => $recipient_contact ?? '',
+					'price'             => array_sum(array_map(fn($p) => str_replace(',','',$p), $price)),
+				);
+				send_parcel_booking_emails($mail_parcel);
+			}
 			return 1;
 		}
 	}

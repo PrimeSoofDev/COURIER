@@ -46,6 +46,47 @@
             </div>
           </div>
         </div>
+
+        <hr>
+        <h5><b>Mailtrap / SMTP Settings</b></h5>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label class="control-label">SMTP Host (Mailtrap)</label>
+              <input type="text" class="form-control form-control-sm" name="smtp_host" value="<?php echo isset($_SESSION['system']['smtp_host']) ? $_SESSION['system']['smtp_host'] : 'sandbox.smtp.mailtrap.io' ?>">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label class="control-label">SMTP Port</label>
+              <input type="text" class="form-control form-control-sm" name="smtp_port" value="<?php echo isset($_SESSION['system']['smtp_port']) ? $_SESSION['system']['smtp_port'] : '2525' ?>">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label class="control-label">SMTP Username</label>
+              <input type="text" class="form-control form-control-sm" name="smtp_user" value="<?php echo isset($_SESSION['system']['smtp_user']) ? $_SESSION['system']['smtp_user'] : '' ?>">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label class="control-label">SMTP Password</label>
+              <input type="password" class="form-control form-control-sm" name="smtp_pass" value="<?php echo isset($_SESSION['system']['smtp_pass']) ? $_SESSION['system']['smtp_pass'] : '' ?>">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label class="control-label">Default Sender Email</label>
+              <input type="email" class="form-control form-control-sm" name="mail_from_address" value="<?php echo isset($_SESSION['system']['mail_from_address']) ? $_SESSION['system']['mail_from_address'] : 'no-reply@gaatitrack.com' ?>">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label class="control-label">Default Sender Name</label>
+              <input type="text" class="form-control form-control-sm" name="mail_from_name" value="<?php echo isset($_SESSION['system']['mail_from_name']) ? $_SESSION['system']['mail_from_name'] : 'GaaTiTrack Logistics' ?>">
+            </div>
+          </div>
+        </div>
         </form>
 <!--  Author Name: Mayuri K. 
  for any PHP, Codeignitor, Laravel OR Python work contact me at mayuri.infospace@gmail.com  

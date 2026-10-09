@@ -9,12 +9,20 @@ $pageTitle = 'System Settings';
 
 // Load existing settings
 $settings = [
-    'name'      => 'GaaTiTrack Logistics USA',
-    'email'     => 'support@gaatitrack.com',
-    'contact'   => '+1 (800) 555-0199',
-    'address'   => '1250 Broadway, Suite 3200, New York, NY 10001, United States',
-    'cover_img' => '',
-    'api_key'   => '',
+    'name'              => 'GaaTiTrack Logistics USA',
+    'email'             => 'support@gaatitrack.com',
+    'contact'           => '+1 (800) 555-0199',
+    'address'           => '1250 Broadway, Suite 3200, New York, NY 10001, United States',
+    'cover_img'         => '',
+    'api_key'           => '',
+    'smtp_host'         => 'sandbox.smtp.mailtrap.io',
+    'smtp_port'         => '2525',
+    'smtp_user'         => '',
+    'smtp_pass'         => '',
+    'smtp_security'     => 'tls',
+    'mail_from_address' => 'no-reply@gaatitrack.com',
+    'mail_from_name'    => 'GaaTiTrack Logistics',
+    'mail_driver'       => 'smtp',
 ];
 
 try {
@@ -22,10 +30,46 @@ try {
     if ($row = $sStmt->fetch()) {
         $settings = array_merge($settings, $row);
     } else {
-        $pdo->query("INSERT INTO system_settings (id, name, email, contact, address, cover_img, api_key) VALUES (1, 'GaaTiTrack Logistics USA', 'support@gaatitrack.com', '+1 (800) 555-0199', '1250 Broadway, Suite 3200, New York, NY 10001, United States', '', '')");
+        $pdo->query("INSERT INTO system_settings (id, name, email, contact, address, cover_img, api_key, smtp_host, smtp_port, smtp_user, smtp_pass, smtp_security, mail_from_address, mail_from_name, mail_driver) VALUES (1, 'GaaTiTrack Logistics USA', 'support@gaatitrack.com', '+1 (800) 555-0199', '1250 Broadway, Suite 3200, New York, NY 10001, United States', '', '', 'sandbox.smtp.mailtrap.io', '2525', '', '', 'tls', 'no-reply@gaatitrack.com', 'GaaTiTrack Logistics', 'smtp')");
     }
 } catch (PDOException $e) {
     app_log("Error reading system settings: " . $e->getMessage(), 'ERROR');
+}
+
+// Handle AJAX / direct test email dispatch to Mailtrap
+if (isset($_GET['action']) && $_GET['action'] === 'test_mailtrap') {
+    header('Content-Type: application/json');
+    require_once __DIR__ . '/../../includes/mailer.php';
+    $to = trim($_POST['test_email'] ?? $_GET['test_email'] ?? '');
+    if (empty($to) || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
+        echo json_encode(['success' => false, 'message' => 'Please provide a valid test recipient email address.']);
+        exit;
+    }
+
+    $tempCfg = get_mail_config();
+    if (!empty($_POST['smtp_host']))         $tempCfg['host']         = trim($_POST['smtp_host']);
+    if (!empty($_POST['smtp_port']))         $tempCfg['port']         = (int)$_POST['smtp_port'];
+    if (isset($_POST['smtp_user']))          $tempCfg['user']         = trim($_POST['smtp_user']);
+    if (isset($_POST['smtp_pass']))          $tempCfg['pass']         = trim($_POST['smtp_pass']);
+    if (!empty($_POST['smtp_security']))     $tempCfg['security']     = trim($_POST['smtp_security']);
+    if (!empty($_POST['mail_from_address'])) $tempCfg['from_address'] = trim($_POST['mail_from_address']);
+    if (!empty($_POST['mail_from_name']))    $tempCfg['from_name']    = trim($_POST['mail_from_name']);
+    $tempCfg['driver'] = 'smtp';
+
+    $subject = "✅ Mailtrap SMTP Connection Test – " . (defined('APP_NAME') ? APP_NAME : 'GaaTiTrack');
+    $body = "<div style='font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;padding:24px;border:1px solid #bfdbfe;border-radius:10px;background:#f8fafc;max-width:550px;'>"
+          . "<h2 style='color:#1e3a8a;margin-top:0;'>🎉 Mailtrap SMTP is Connected!</h2>"
+          . "<p style='color:#334155;font-size:14px;line-height:1.6;'>This is a verified test dispatch from your <strong>GaaTiTrack Logistics</strong> system settings. Your Mailtrap credentials and SMTP socket are fully operational.</p>"
+          . "<div style='background:#eff6ff;padding:12px;border-radius:6px;font-size:12px;color:#1e40af;font-family:monospace;'>"
+          . "Host: " . htmlspecialchars($tempCfg['host']) . ":" . $tempCfg['port'] . "<br>"
+          . "Security: " . strtoupper($tempCfg['security']) . "<br>"
+          . "From: " . htmlspecialchars($tempCfg['from_name']) . " &lt;" . htmlspecialchars($tempCfg['from_address']) . "&gt;<br>"
+          . "Timestamp: " . date('Y-m-d H:i:s')
+          . "</div></div>";
+
+    $res = send_smtp_socket($to, 'Mailtrap Tester', $subject, $body, $tempCfg);
+    echo json_encode($res);
+    exit;
 }
 
 $errors = [];
@@ -36,12 +80,20 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     if (!verify_csrf_token($csrf)) {
         $errors[] = 'Security validation failed (CSRF token expired or mismatch).';
     } else {
-        $name       = trim($_POST['name'] ?? '');
-        $email      = trim($_POST['email'] ?? '');
-        $contact    = trim($_POST['contact'] ?? '');
-        $address    = trim($_POST['address'] ?? '');
-        $apiKey     = trim($_POST['api_key'] ?? '');
-        $coverImgPath = $settings['cover_img'] ?? '';
+        $name            = trim($_POST['name'] ?? '');
+        $email           = trim($_POST['email'] ?? '');
+        $contact         = trim($_POST['contact'] ?? '');
+        $address         = trim($_POST['address'] ?? '');
+        $apiKey          = trim($_POST['api_key'] ?? '');
+        $smtpHost        = trim($_POST['smtp_host'] ?? 'sandbox.smtp.mailtrap.io');
+        $smtpPort        = trim($_POST['smtp_port'] ?? '2525');
+        $smtpUser        = trim($_POST['smtp_user'] ?? '');
+        $smtpPass        = trim($_POST['smtp_pass'] ?? '');
+        $smtpSecurity    = trim($_POST['smtp_security'] ?? 'tls');
+        $mailFromAddress = trim($_POST['mail_from_address'] ?? 'no-reply@gaatitrack.com');
+        $mailFromName    = trim($_POST['mail_from_name'] ?? 'GaaTiTrack Logistics');
+        $mailDriver      = trim($_POST['mail_driver'] ?? 'smtp');
+        $coverImgPath    = $settings['cover_img'] ?? '';
 
         if (empty($name))  $errors[] = 'Company or portal system name is required.';
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'A valid official contact email address is required.';
@@ -79,19 +131,39 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 
         if (empty($errors)) {
             try {
-                $upd = $pdo->prepare("UPDATE system_settings SET name=:name,email=:email,contact=:contact,address=:address,cover_img=:cover,api_key=:api_key WHERE id=1");
-                $upd->execute([':name'=>$name,':email'=>$email,':contact'=>$contact,':address'=>$address,':cover'=>$coverImgPath,':api_key'=>$apiKey]);
-                app_log("Updated system settings by Admin " . current_user_id());
-                $_SESSION['flash_success'] = 'System settings updated successfully.';
-                header("Location: " . APP_URL . "/admin/index.php?page=settings");
+                $upd = $pdo->prepare("UPDATE system_settings SET
+                    name=:name, email=:email, contact=:contact, address=:address, cover_img=:cover, api_key=:api_key,
+                    smtp_host=:smtp_host, smtp_port=:smtp_port, smtp_user=:smtp_user, smtp_pass=:smtp_pass,
+                    smtp_security=:smtp_security, mail_from_address=:mail_from_address, mail_from_name=:mail_from_name,
+                    mail_driver=:mail_driver WHERE id=1");
+                $upd->execute([
+                    ':name'              => $name,
+                    ':email'             => $email,
+                    ':contact'           => $contact,
+                    ':address'           => $address,
+                    ':cover'             => $coverImgPath,
+                    ':api_key'           => $apiKey,
+                    ':smtp_host'         => $smtpHost,
+                    ':smtp_port'         => $smtpPort,
+                    ':smtp_user'         => $smtpUser,
+                    ':smtp_pass'         => $smtpPass,
+                    ':smtp_security'     => $smtpSecurity,
+                    ':mail_from_address' => $mailFromAddress,
+                    ':mail_from_name'    => $mailFromName,
+                    ':mail_driver'       => $mailDriver,
+                ]);
+                app_log("Updated system settings including Mailtrap/SMTP by Admin " . current_user_id());
+                $_SESSION['flash_success'] = 'System and Mailtrap settings updated successfully.';
+                header("Location: " . APP_URL . "/admin/index.php?page=settings#mailtrap");
                 exit;
             } catch (PDOException $e) {
                 app_log("Settings update error: " . $e->getMessage(), 'ERROR');
-                $errors[] = 'Database error while saving settings.';
+                $errors[] = 'Database error while saving settings: ' . $e->getMessage();
             }
         }
     }
 }
+
 
 require_once __DIR__ . '/../header.php';
 ?>
@@ -251,6 +323,9 @@ require_once __DIR__ . '/../header.php';
       <a class="settings-nav-link" href="#apikeys">
         <span class="nav-dot"></span> API Configuration
       </a>
+      <a class="settings-nav-link" href="#mailtrap">
+        <span class="nav-dot"></span> Email & Mailtrap (SMTP)
+      </a>
     </div>
 
     <!-- Info card -->
@@ -400,6 +475,144 @@ require_once __DIR__ . '/../header.php';
       </div>
     </div>
 
+    <!-- Email & Mailtrap (SMTP) Configuration -->
+    <div class="settings-section" id="mailtrap">
+      <div class="settings-section-header" style="justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="settings-section-icon" style="background:#e0e7ff;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4338ca" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <div>
+            <div style="font-size:.9rem;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:8px;">
+              Email & Mailtrap (SMTP) Settings
+              <span style="font-size:0.7rem;background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:20px;font-weight:600;">Mailtrap Ready</span>
+            </div>
+            <div style="font-size:.78rem;color:#64748b;">Configure Mailtrap or external SMTP for booking confirmation emails</div>
+          </div>
+        </div>
+        <button type="button" onclick="fillMailtrapSandboxDefaults()" style="display:inline-flex;align-items:center;gap:6px;background:#f1f5f9;border:1px solid #cbd5e1;padding:6px 12px;border-radius:8px;font-size:0.78rem;font-weight:600;color:#1e293b;cursor:pointer;transition:background 0.15s;">
+          ⚡ Autofill Mailtrap Sandbox
+        </button>
+      </div>
+
+      <div class="settings-section-body">
+        
+        <!-- Mailtrap helper banner -->
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid #4f46e5;border-radius:8px;padding:12px 16px;margin-bottom:1.5rem;display:flex;align-items:flex-start;gap:12px;">
+          <div style="font-size:1.2rem;line-height:1;">📬</div>
+          <div style="font-size:0.8125rem;color:#475569;line-height:1.5;">
+            <strong>Using Mailtrap:</strong> Sign in to <a href="https://mailtrap.io" target="_blank" style="color:#4f46e5;font-weight:600;text-decoration:none;">mailtrap.io</a>, open your <em>Email Testing Inbox &rarr; Integrations</em>, choose <em>SMTP</em>, and copy your username &amp; password below. All booking confirmation emails to sender and recipient will be captured safely!
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field-group">
+            <label for="mail_driver" class="field-label">Email Driver / Transport</label>
+            <select id="mail_driver" name="mail_driver" class="modern-input">
+              <option value="smtp" <?php echo ($settings['mail_driver'] ?? 'smtp') === 'smtp' ? 'selected' : ''; ?>>Mailtrap / SMTP Socket (Recommended)</option>
+              <option value="mail" <?php echo ($settings['mail_driver'] ?? '') === 'mail' ? 'selected' : ''; ?>>PHP Native mail()</option>
+            </select>
+            <div class="field-hint">Select SMTP for Mailtrap test sandbox or live production relays.</div>
+          </div>
+          <div class="field-group">
+            <label for="smtp_security" class="field-label">Encryption Protocol</label>
+            <select id="smtp_security" name="smtp_security" class="modern-input">
+              <option value="tls" <?php echo ($settings['smtp_security'] ?? 'tls') === 'tls' ? 'selected' : ''; ?>>TLS / STARTTLS (Default for Mailtrap 2525/587)</option>
+              <option value="ssl" <?php echo ($settings['smtp_security'] ?? '') === 'ssl' ? 'selected' : ''; ?>>SSL (Port 465)</option>
+              <option value="none" <?php echo ($settings['smtp_security'] ?? '') === 'none' ? 'selected' : ''; ?>>None (Plaintext)</option>
+            </select>
+            <div class="field-hint">Mailtrap supports TLS on ports 2525, 587, and 25.</div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field-group">
+            <label for="smtp_host" class="field-label">SMTP Host <span class="required">*</span></label>
+            <input type="text" id="smtp_host" name="smtp_host" class="modern-input"
+                   value="<?php echo e($_POST['smtp_host'] ?? $settings['smtp_host'] ?? 'sandbox.smtp.mailtrap.io'); ?>"
+                   placeholder="sandbox.smtp.mailtrap.io" required>
+            <div class="field-hint">Mailtrap Sandbox: <code>sandbox.smtp.mailtrap.io</code> (or live: <code>live.smtp.mailtrap.io</code>)</div>
+          </div>
+          <div class="field-group">
+            <label for="smtp_port" class="field-label">SMTP Port <span class="required">*</span></label>
+            <input type="text" id="smtp_port" name="smtp_port" class="modern-input"
+                   value="<?php echo e($_POST['smtp_port'] ?? $settings['smtp_port'] ?? '2525'); ?>"
+                   placeholder="2525" required>
+            <div class="field-hint">Typically <code>2525</code>, <code>587</code>, or <code>25</code> for Mailtrap.</div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field-group">
+            <label for="smtp_user" class="field-label">SMTP Username (Mailtrap)</label>
+            <input type="text" id="smtp_user" name="smtp_user" class="modern-input"
+                   value="<?php echo e($_POST['smtp_user'] ?? $settings['smtp_user'] ?? ''); ?>"
+                   placeholder="e.g. 1a2b3c4d5e6f7g" autocomplete="off">
+            <div class="field-hint">Your Mailtrap inbox username.</div>
+          </div>
+          <div class="field-group">
+            <label for="smtp_pass" class="field-label">SMTP Password (Mailtrap)</label>
+            <div style="position:relative;">
+              <input type="password" id="smtp_pass" name="smtp_pass" class="modern-input"
+                     value="<?php echo e($_POST['smtp_pass'] ?? $settings['smtp_pass'] ?? ''); ?>"
+                     placeholder="Paste Mailtrap SMTP password" autocomplete="off"
+                     style="padding-right:44px;font-family:monospace;">
+              <button type="button" onclick="toggleSmtpPassVisibility()"
+                      title="Toggle password visibility"
+                      style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:6px;display:flex;align-items:center;color:#64748b;">
+                <svg id="smtpEyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <div class="field-hint">Your Mailtrap inbox password.</div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field-group">
+            <label for="mail_from_address" class="field-label">Default Sender / From Email <span class="required">*</span></label>
+            <input type="email" id="mail_from_address" name="mail_from_address" class="modern-input"
+                   value="<?php echo e($_POST['mail_from_address'] ?? $settings['mail_from_address'] ?? 'no-reply@gaatitrack.com'); ?>"
+                   placeholder="no-reply@gaatitrack.com" required>
+            <div class="field-hint">Displayed as the sender address on outgoing parcel booking notifications.</div>
+          </div>
+          <div class="field-group">
+            <label for="mail_from_name" class="field-label">Default Sender / From Name <span class="required">*</span></label>
+            <input type="text" id="mail_from_name" name="mail_from_name" class="modern-input"
+                   value="<?php echo e($_POST['mail_from_name'] ?? $settings['mail_from_name'] ?? 'GaaTiTrack Logistics'); ?>"
+                   placeholder="GaaTiTrack Logistics" required>
+            <div class="field-hint">Company name displayed in the recipient's inbox.</div>
+          </div>
+        </div>
+
+        <!-- Live Mailtrap Test Sandbox Dispatch Box -->
+        <div style="background:#f1f5f9;border:1.5px solid #cbd5e1;border-radius:12px;padding:1.25rem;margin-top:1rem;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <div style="width:24px;height:24px;background:#4f46e5;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;">🚀</div>
+            <div style="font-size:0.875rem;font-weight:700;color:#0f172a;">Live Mailtrap Connection Tester</div>
+          </div>
+          <p style="font-size:0.8rem;color:#64748b;margin:0 0 12px;line-height:1.5;">
+            Send a live test message to verify your Mailtrap credentials right now. The email will show up instantly in your Mailtrap inbox.
+          </p>
+
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <div style="flex:1;min-width:240px;">
+              <input type="email" id="test_email_recipient" class="modern-input"
+                     value="<?php echo e(current_user()['email'] ?? 'test@example.com'); ?>"
+                     placeholder="Recipient address (e.g. test@example.com)">
+            </div>
+            <button type="button" id="btnTestMailtrap" onclick="runMailtrapTest()"
+                    style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#4f46e5;color:#fff;border:none;border-radius:9px;font-size:0.84rem;font-weight:700;cursor:pointer;transition:background 0.15s,transform 0.15s;white-space:nowrap;">
+              <span id="testMailtrapBtnText">✉️ Send Test to Mailtrap</span>
+              <span id="testMailtrapSpinner" style="display:none;">⏳ Testing...</span>
+            </button>
+          </div>
+
+          <div id="mailtrapTestResult" style="display:none;margin-top:12px;padding:12px 14px;border-radius:8px;font-size:0.82rem;"></div>
+        </div>
+
+      </div>
+    </div>
+
     <!-- Save Bar -->
     <div class="save-bar" style="border-radius:14px;border:1px solid #e2e8f0;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
       <div style="font-size:.83rem;color:#64748b;">All fields marked <span style="color:#ef4444;font-weight:700;">*</span> are required.</div>
@@ -464,6 +677,100 @@ function toggleApiKeyVisibility() {
       icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
     }
   }
+}
+
+function toggleSmtpPassVisibility() {
+  var input = document.getElementById('smtp_pass');
+  var icon = document.getElementById('smtpEyeIcon');
+  if (!input) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (icon) {
+      icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+    }
+  } else {
+    input.type = 'password';
+    if (icon) {
+      icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+    }
+  }
+}
+
+function fillMailtrapSandboxDefaults() {
+  document.getElementById('smtp_host').value = 'sandbox.smtp.mailtrap.io';
+  document.getElementById('smtp_port').value = '2525';
+  document.getElementById('smtp_security').value = 'tls';
+  document.getElementById('mail_driver').value = 'smtp';
+  var userField = document.getElementById('smtp_user');
+  userField.focus();
+  userField.style.borderColor = '#4f46e5';
+  userField.style.boxShadow = '0 0 0 3px rgba(79,70,229,0.2)';
+  setTimeout(function() {
+    userField.style.borderColor = '';
+    userField.style.boxShadow = '';
+  }, 2000);
+}
+
+function runMailtrapTest() {
+  var recipient = document.getElementById('test_email_recipient').value.trim();
+  var resultBox = document.getElementById('mailtrapTestResult');
+  var btn = document.getElementById('btnTestMailtrap');
+  var btnText = document.getElementById('testMailtrapBtnText');
+  var spinner = document.getElementById('testMailtrapSpinner');
+
+  if (!recipient) {
+    alert('Please enter a recipient email address to test.');
+    return;
+  }
+
+  btn.disabled = true;
+  btnText.style.display = 'none';
+  spinner.style.display = 'inline';
+  resultBox.style.display = 'none';
+
+  var formData = new FormData();
+  formData.append('test_email', recipient);
+  formData.append('smtp_host', document.getElementById('smtp_host').value);
+  formData.append('smtp_port', document.getElementById('smtp_port').value);
+  formData.append('smtp_user', document.getElementById('smtp_user').value);
+  formData.append('smtp_pass', document.getElementById('smtp_pass').value);
+  formData.append('smtp_security', document.getElementById('smtp_security').value);
+  formData.append('mail_from_address', document.getElementById('mail_from_address').value);
+  formData.append('mail_from_name', document.getElementById('mail_from_name').value);
+
+  fetch('<?php echo APP_URL; ?>/admin/index.php?page=settings&action=test_mailtrap', {
+    method: 'POST',
+    body: formData
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    btn.disabled = false;
+    btnText.style.display = 'inline';
+    spinner.style.display = 'none';
+    resultBox.style.display = 'block';
+
+    if (data.success) {
+      resultBox.style.background = '#ecfdf5';
+      resultBox.style.border = '1px solid #a7f3d0';
+      resultBox.style.color = '#065f46';
+      resultBox.innerHTML = '<strong>✅ Success!</strong> ' + (data.message || 'Test email dispatched to Mailtrap inbox.');
+    } else {
+      resultBox.style.background = '#fef2f2';
+      resultBox.style.border = '1px solid #fecaca';
+      resultBox.style.color = '#991b1b';
+      resultBox.innerHTML = '<strong>❌ Connection Failed:</strong> ' + (data.message || 'Unable to connect to Mailtrap SMTP.');
+    }
+  })
+  .catch(function(err) {
+    btn.disabled = false;
+    btnText.style.display = 'inline';
+    spinner.style.display = 'none';
+    resultBox.style.display = 'block';
+    resultBox.style.background = '#fef2f2';
+    resultBox.style.border = '1px solid #fecaca';
+    resultBox.style.color = '#991b1b';
+    resultBox.innerHTML = '<strong>❌ Network Error:</strong> ' + err.message;
+  });
 }
 </script>
 

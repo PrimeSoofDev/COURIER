@@ -22,8 +22,8 @@ function generate_unique_reference($pdo) {
 $branches = $pdo->query("SELECT id, branch_code, city, state, street, zip_code FROM branches ORDER BY city ASC")->fetchAll();
 
 $formData = [
-    'sender_name'      => '', 'sender_address'    => '', 'sender_contact'    => '',
-    'recipient_name'   => '', 'recipient_address' => '', 'recipient_contact' => '',
+    'sender_name'      => '', 'sender_address'    => '', 'sender_contact'    => '', 'sender_email' => '',
+    'recipient_name'   => '', 'recipient_address' => '', 'recipient_contact' => '', 'recipient_email' => '',
     'type'             => 1,
     'from_branch_id'   => is_admin() ? '' : user_branch_id(),
     'to_branch_id'     => '',
@@ -39,10 +39,12 @@ if ($isEditing) {
         $formData = array_merge($formData, [
             'sender_name'    => $existing['sender_name'],
             'sender_address' => $existing['sender_address'],
-            'sender_contact' => $existing['sender_contact'],
+            'sender_contact' => $existing['sender_contact'] ?? '',
+            'sender_email'   => $existing['sender_email'] ?? '',
             'recipient_name'    => $existing['recipient_name'],
             'recipient_address' => $existing['recipient_address'],
-            'recipient_contact' => $existing['recipient_contact'],
+            'recipient_contact' => $existing['recipient_contact'] ?? '',
+            'recipient_email'   => $existing['recipient_email'] ?? '',
             'type'           => (int)$existing['type'],
             'from_branch_id' => $existing['from_branch_id'],
             'to_branch_id'   => $existing['to_branch_id'],
@@ -64,9 +66,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         $errorMsg = 'Security validation failed. Please try again.';
     } else {
         $sender_name      = trim($_POST['sender_name']      ?? '');
+        $sender_email     = trim($_POST['sender_email']     ?? '');
         $sender_address   = trim($_POST['sender_address']   ?? '');
         $sender_contact   = trim($_POST['sender_contact']   ?? '');
         $recipient_name   = trim($_POST['recipient_name']   ?? '');
+        $recipient_email  = trim($_POST['recipient_email']  ?? '');
         $recipient_address= trim($_POST['recipient_address']?? '');
         $recipient_contact= trim($_POST['recipient_contact']?? '');
         $type             = (int)($_POST['type'] ?? 1);
@@ -78,8 +82,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         $lengths = $_POST['length'] ?? [];
         $prices  = $_POST['price']  ?? [];
 
-        if (empty($sender_name) || empty($sender_contact) || empty($recipient_name) || empty($recipient_contact)) {
-            $errorMsg = 'Please complete all required sender and recipient contact fields.';
+        if (empty($sender_name) || empty($recipient_name)) {
+            $errorMsg = 'Please complete sender and recipient full names.';
+        } elseif (empty($sender_email) || !filter_var($sender_email, FILTER_VALIDATE_EMAIL)) {
+            $errorMsg = 'A valid sender email address is required so the sender receives booking confirmation.';
+        } elseif (empty($recipient_email) || !filter_var($recipient_email, FILTER_VALIDATE_EMAIL)) {
+            $errorMsg = 'A valid recipient email address is required so the recipient receives consignment tracking details.';
+        } elseif (empty($sender_address) || empty($recipient_address)) {
+            $errorMsg = 'Please provide full origin and delivery addresses.';
         } elseif (empty($from_branch_id)) {
             $errorMsg = 'Please designate the origin processing branch.';
         } elseif ($type == 2 && empty($to_branch_id)) {
@@ -124,14 +134,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                     if ($isEditing) {
                         $priceVal = (float)str_replace(',', '', $prices[0] ?? 0);
                         $upStmt = $pdo->prepare("UPDATE parcels SET
-                            sender_name=:sname,sender_address=:saddr,sender_contact=:scontact,
-                            recipient_name=:rname,recipient_address=:raddr,recipient_contact=:rcontact,
+                            sender_name=:sname,sender_address=:saddr,sender_contact=:scontact,sender_email=:semail,
+                            recipient_name=:rname,recipient_address=:raddr,recipient_contact=:rcontact,recipient_email=:remail,
                             type=:type,from_branch_id=:fbid,to_branch_id=:tbid,
                             parcel_image=:img,
                             weight=:weight,height=:height,width=:width,length=:length,price=:price WHERE id=:id");
                         $upStmt->execute([
-                            ':sname'=>$sender_name,':saddr'=>$sender_address,':scontact'=>$sender_contact,
-                            ':rname'=>$recipient_name,':raddr'=>$recipient_address,':rcontact'=>$recipient_contact,
+                            ':sname'=>$sender_name,':saddr'=>$sender_address,':scontact'=>$sender_contact,':semail'=>$sender_email,
+                            ':rname'=>$recipient_name,':raddr'=>$recipient_address,':rcontact'=>$recipient_contact,':remail'=>$recipient_email,
                             ':type'=>$type,':fbid'=>$from_branch_id,':tbid'=>$to_branch_id,
                             ':img'=>$parcelImgPath,
                             ':weight'=>trim($weights[0]??''),':height'=>trim($heights[0]??''),
@@ -145,14 +155,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                         exit;
                     } else {
                         $createdIds = []; $lastRef = '';
-                        $inStmt = $pdo->prepare("INSERT INTO parcels (reference_number,sender_name,sender_address,sender_contact,recipient_name,recipient_address,recipient_contact,type,from_branch_id,to_branch_id,parcel_image,weight,height,width,length,price,status,date_created) VALUES (:ref,:sname,:saddr,:scontact,:rname,:raddr,:rcontact,:type,:fbid,:tbid,:img,:weight,:height,:width,:length,:price,0,NOW())");
+                        $inStmt = $pdo->prepare("INSERT INTO parcels (reference_number,sender_name,sender_address,sender_contact,sender_email,recipient_name,recipient_address,recipient_contact,recipient_email,type,from_branch_id,to_branch_id,parcel_image,weight,height,width,length,price,status,date_created) VALUES (:ref,:sname,:saddr,:scontact,:semail,:rname,:raddr,:rcontact,:remail,:type,:fbid,:tbid,:img,:weight,:height,:width,:length,:price,0,NOW())");
                         $trStmt = $pdo->prepare("INSERT INTO parcel_tracks (parcel_id,status,date_created) VALUES (:pid,0,NOW())");
                         foreach ($weights as $k => $w) {
                             $refNum = generate_unique_reference($pdo); $lastRef = $refNum;
                             $pVal   = (float)str_replace(',', '', $prices[$k] ?? 0);
                             $inStmt->execute([
-                                ':ref'=>$refNum,':sname'=>$sender_name,':saddr'=>$sender_address,':scontact'=>$sender_contact,
-                                ':rname'=>$recipient_name,':raddr'=>$recipient_address,':rcontact'=>$recipient_contact,
+                                ':ref'=>$refNum,':sname'=>$sender_name,':saddr'=>$sender_address,':scontact'=>$sender_contact,':semail'=>$sender_email,
+                                ':rname'=>$recipient_name,':raddr'=>$recipient_address,':rcontact'=>$recipient_contact,':remail'=>$recipient_email,
                                 ':type'=>$type,':fbid'=>$from_branch_id,':tbid'=>$to_branch_id,
                                 ':img'=>$parcelImgPath,
                                 ':weight'=>trim($w),':height'=>trim($heights[$k]??''),':width'=>trim($widths[$k]??''),
@@ -163,8 +173,25 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                             $trStmt->execute([':pid' => $newId]);
                         }
                         $pdo->commit();
+
+                        // Dispatch booking confirmation emails to both sender and recipient
+                        require_once __DIR__ . '/../../includes/mailer.php';
+                        $mail_parcel = [
+                            'reference_number'  => $lastRef,
+                            'sender_name'       => $sender_name,
+                            'sender_email'      => $sender_email,
+                            'sender_address'    => $sender_address,
+                            'sender_contact'    => $sender_contact,
+                            'recipient_name'    => $recipient_name,
+                            'recipient_email'   => $recipient_email,
+                            'recipient_address' => $recipient_address,
+                            'recipient_contact' => $recipient_contact,
+                            'price'             => array_sum(array_map(fn($p) => (float)str_replace(',', '', $p), $prices)),
+                        ];
+                        send_parcel_booking_emails($mail_parcel);
+
                         app_log("Created " . count($createdIds) . " consignment(s). Last: {$lastRef}");
-                        $_SESSION['flash_success'] = "Consignment booked! Reference: #{$lastRef}";
+                        $_SESSION['flash_success'] = "Consignment booked! Reference: #{$lastRef}. Confirmation email sent to {$sender_email} and {$recipient_email}.";
                         header("Location: " . APP_URL . "/admin/index.php?page=view_parcel&id=" . $createdIds[0]);
                         exit;
                     }
@@ -373,8 +400,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             <input type="text" name="sender_name" class="f-input" value="<?php echo e($formData['sender_name']); ?>" required placeholder="e.g. Michael Anderson">
           </div>
           <div class="field-block">
-            <label class="f-label">Contact Number <span class="req">*</span></label>
-            <input type="text" name="sender_contact" class="f-input" value="<?php echo e($formData['sender_contact']); ?>" required placeholder="+1 (212) 555-0143">
+            <label class="f-label">Email Address <span class="req">*</span></label>
+            <input type="email" name="sender_email" class="f-input" value="<?php echo e($formData['sender_email'] ?? ''); ?>" required placeholder="e.g. sender@example.com">
+          </div>
+          <div class="field-block">
+            <label class="f-label">Contact Number <span style="font-weight:400;color:#94a3b8;font-size:0.75rem;">(Optional)</span></label>
+            <input type="text" name="sender_contact" class="f-input" value="<?php echo e($formData['sender_contact']); ?>" placeholder="+1 (212) 555-0143">
           </div>
           <div class="field-block">
             <label class="f-label">Address <span class="req">*</span></label>
@@ -394,8 +425,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             <input type="text" name="recipient_name" class="f-input" value="<?php echo e($formData['recipient_name']); ?>" required placeholder="e.g. Sarah Jenkins">
           </div>
           <div class="field-block">
-            <label class="f-label">Contact Number <span class="req">*</span></label>
-            <input type="text" name="recipient_contact" class="f-input" value="<?php echo e($formData['recipient_contact']); ?>" required placeholder="+1 (312) 555-0182">
+            <label class="f-label">Email Address <span class="req">*</span></label>
+            <input type="email" name="recipient_email" class="f-input" value="<?php echo e($formData['recipient_email'] ?? ''); ?>" required placeholder="e.g. recipient@example.com">
+          </div>
+          <div class="field-block">
+            <label class="f-label">Contact Number <span style="font-weight:400;color:#94a3b8;font-size:0.75rem;">(Optional)</span></label>
+            <input type="text" name="recipient_contact" class="f-input" value="<?php echo e($formData['recipient_contact']); ?>" placeholder="+1 (312) 555-0182">
           </div>
           <div class="field-block">
             <label class="f-label">Delivery Address <span class="req">*</span></label>

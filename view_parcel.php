@@ -37,7 +37,9 @@ $branch = array();
 						<dt>Address:</dt>
 						<dd><?php echo ucwords($sender_address) ?></dd>
 						<dt>Contact:</dt>
-						<dd><?php echo ucwords($sender_contact) ?></dd>
+						<dd><?php echo !empty($sender_contact) ? ucwords($sender_contact) : '<em>N/A</em>' ?></dd>
+						<dt>Email:</dt>
+						<dd><?php echo !empty($sender_email) ? $sender_email : '<em>N/A</em>' ?></dd>
 					</dl>
 				</div><!--  Author Name: Mayuri K. 
  for any PHP, Codeignitor, Laravel OR Python work contact me at mayuri.infospace@gmail.com  
@@ -50,7 +52,9 @@ $branch = array();
 						<dt>Address:</dt>
 						<dd><?php echo ucwords($recipient_address) ?></dd>
 						<dt>Contact:</dt>
-						<dd><?php echo ucwords($recipient_contact) ?></dd>
+						<dd><?php echo !empty($recipient_contact) ? ucwords($recipient_contact) : '<em>N/A</em>' ?></dd>
+						<dt>Email:</dt>
+						<dd><?php echo !empty($recipient_email) ? $recipient_email : '<em>N/A</em>' ?></dd>
 					</dl>
 				</div>
 			</div>

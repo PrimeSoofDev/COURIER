@@ -109,6 +109,11 @@ require_once __DIR__ . '/includes/public_header.php';
 ?>
 <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/plugins/leaflet/leaflet.css">
 <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/tracking-map.css">
+<style>
+/* ── Tracking page: reduce global font scale ── */
+html { font-size: 13px !important; }
+body  { font-size: 0.9375rem; }
+</style>
 
 <!-- Premium Glassmorphism Tracking Hero Section -->
 <section class="gt-hero-section">
