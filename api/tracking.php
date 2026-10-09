@@ -144,7 +144,14 @@ try {
         ];
     }
 
-    $routeWaypoints = calculate_route_waypoints($originCoords, $destCoords, 60);
+    // Fetch optional API key from system settings (e.g. OpenRouteService)
+    $sysApiKey = '';
+    try {
+        $sysRow = $pdo->query("SELECT api_key FROM system_settings WHERE id = 1 LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+        $sysApiKey = $sysRow['api_key'] ?? '';
+    } catch (Exception $e) {}
+
+    $routeWaypoints = calculate_route_waypoints($originCoords, $destCoords, 60, $sysApiKey);
 
     // Current Milestone Progress Percentage
     $statusCode = (int)$parcel['status'];

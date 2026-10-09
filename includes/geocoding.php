@@ -214,11 +214,56 @@ function resolve_destination_coordinates($destBranch, $recipientAddress) {
 }
 
 /**
- * Generate Great-Circle / Curved Geographic Route Points between Origin & Destination
- * Creates intermediate waypoints for smooth map polyline drawing and parcel traversal.
+ * Generate Great-Circle / Curved Geographic Route Points between Origin & Destination.
+ * If an OpenRouteService API key is available, attempts to fetch real road network
+ * geometry; otherwise smoothly computes great-circle curved waypoints.
  */
-function calculate_route_waypoints($origin, $dest, $numPoints = 50) {
+function calculate_route_waypoints($origin, $dest, $numPoints = 50, $apiKey = null) {
     if (!$origin || !$dest) return [];
+
+    // Attempt real road routing via OpenRouteService if API key is provided
+    if (!empty($apiKey) && !empty($origin['lat']) && !empty($dest['lat'])) {
+        try {
+            $start = $origin['lng'] . ',' . $origin['lat'];
+            $end = $dest['lng'] . ',' . $dest['lat'];
+            $orsUrl = "https://api.openrouteservice.org/v2/directions/driving-car?api_key=" . urlencode(trim($apiKey)) . "&start={$start}&end={$end}";
+            $ctx = stream_context_create([
+                'http' => [
+                    'method' => 'GET',
+                    'header' => "Accept: application/json\r\n",
+                    'timeout' => 2.5
+                ]
+            ]);
+            $res = @file_get_contents($orsUrl, false, $ctx);
+            if ($res) {
+                $data = json_decode($res, true);
+                if (!empty($data['features'][0]['geometry']['coordinates'])) {
+                    $raw = $data['features'][0]['geometry']['coordinates'];
+                    $total = count($raw);
+                    if ($total > 10) {
+                        $step = max(1, (int)floor($total / $numPoints));
+                        $points = [];
+                        for ($i = 0; $i < $total; $i += $step) {
+                            $points[] = [
+                                'lat' => round($raw[$i][1], 5),
+                                'lng' => round($raw[$i][0], 5)
+                            ];
+                        }
+                        $last = end($raw);
+                        $points[] = [
+                            'lat' => round($last[1], 5),
+                            'lng' => round($last[0], 5)
+                        ];
+                        if (count($points) >= 10) {
+                            return $points;
+                        }
+                    }
+                }
+            }
+        } catch (Throwable $e) {
+            // Silently fall through to curved waypoint fallback
+        }
+    }
 
     $lat1 = deg2rad($origin['lat']);
     $lng1 = deg2rad($origin['lng']);

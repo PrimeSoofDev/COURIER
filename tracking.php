@@ -597,12 +597,26 @@ require_once __DIR__ . '/includes/public_header.php';
           attributionControl: true
         }).setView([mapData.current_pos.lat, mapData.current_pos.lng], 5);
 
-        // CartoDB Voyager tiles (clear, modern, high performance)
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> &copy; <a href="https://carto.com/" target="_blank">CARTO</a>',
-          subdomains: 'abcd',
+        // Clean OpenStreetMap Tiles (100% Free, Crisp, No Watermark)
+        var osmLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
           maxZoom: 19
-        }).addTo(map);
+        });
+
+        // Clean Esri World Street Layer (Logistics view)
+        var esriLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+          attribution: 'Tiles &copy; Esri',
+          maxZoom: 19
+        });
+
+        // Set OpenStreetMap as the active basemap
+        osmLayer.addTo(map);
+
+        // Map layer toggle control
+        L.control.layers({
+          "OpenStreetMap": osmLayer,
+          "Esri Streets": esriLayer
+        }, null, { position: 'topright' }).addTo(map);
 
         // Add Zoom Control to Bottom-Right
         L.control.zoom({ position: 'bottomright' }).addTo(map);
